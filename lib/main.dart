@@ -80,6 +80,16 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String _name = "";
 
+  final nameHolder = TextEditingController();
+
+  void clearTextInput() {
+    nameHolder.clear();
+  }
+
+  void _setName(text) {
+    _name = text;
+  }
+
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -95,6 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
       }).then((value) {
         print(value.id);
       });
+
+      clearTextInput();
     });
   }
 
@@ -143,6 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 alignment: Alignment.center,
                 child: TextField(
                   decoration: InputDecoration(hintText: "Name"),
+                  controller: nameHolder,
                   onChanged: (text) {
                     _setName(text);
                   },
@@ -157,9 +170,5 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
-  }
-
-  void _setName(text) {
-    _name = text;
   }
 }
