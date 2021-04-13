@@ -1,7 +1,35 @@
 import 'package:flutter/material.dart';
 
+// Import the firebase_core plugin
+import 'package:firebase_core/firebase_core.dart';
+
 void main() {
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(FirebaseInitializer());
+}
+
+class FirebaseInitializer extends StatelessWidget {
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            Widget error = Text('...error initializing firebase...');
+            ErrorWidget.builder = (FlutterErrorDetails errorDetails) => error;
+          }
+
+          if (snapshot.connectionState == ConnectionState.done) {
+            return MyApp();
+          }
+
+          return CircularProgressIndicator(
+            backgroundColor: Colors.blue[50],
+          );
+        });
+  }
 }
 
 class MyApp extends StatelessWidget {
