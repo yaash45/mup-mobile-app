@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'MUP App',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'MUP App Home Page'),
     );
   }
 }
@@ -78,6 +78,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String _name = "";
 
   void _incrementCounter() {
     setState(() {
@@ -88,8 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
       databaseReference.collection("flutter_count").add({
-        "name": "john",
+        "name": _name,
         "count": _counter,
+        "timestamp": DateTime.now().millisecondsSinceEpoch,
       }).then((value) {
         print(value.id);
       });
@@ -137,6 +139,15 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            Container(
+                alignment: Alignment.center,
+                child: TextField(
+                  decoration: InputDecoration(hintText: "Name"),
+                  onChanged: (text) {
+                    _setName(text);
+                  },
+                ),
+                width: MediaQuery.of(context).size.width * 0.5)
           ],
         ),
       ),
@@ -146,5 +157,9 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void _setName(text) {
+    _name = text;
   }
 }
