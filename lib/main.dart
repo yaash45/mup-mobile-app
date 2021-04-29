@@ -1,7 +1,38 @@
 import 'package:flutter/material.dart';
 
+// Import the firebase_core plugin
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+final databaseReference = FirebaseFirestore.instance;
+
 void main() {
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(FirebaseInitializer());
+}
+
+class FirebaseInitializer extends StatelessWidget {
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            Widget error = Text('...error initializing firebase...');
+            ErrorWidget.builder = (FlutterErrorDetails errorDetails) => error;
+          }
+
+          if (snapshot.connectionState == ConnectionState.done) {
+            return MyApp();
+          }
+
+          return CircularProgressIndicator(
+            backgroundColor: Colors.blue[50],
+          );
+        });
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -9,7 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'MUP App',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -22,7 +53,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'MUP App Home Page'),
     );
   }
 }
@@ -47,6 +78,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String _name = "";
+
+  final nameHolder = TextEditingController();
+
+  void clearTextInput() {
+    nameHolder.clear();
+  }
+
+  void _setName(text) {
+    _name = text;
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -56,6 +98,15 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+      databaseReference.collection("flutter_count").add({
+        "name": _name,
+        "count": _counter,
+        "timestamp": DateTime.now().millisecondsSinceEpoch,
+      }).then((value) {
+        print(value.id);
+      });
+
+      clearTextInput();
     });
   }
 
@@ -100,6 +151,16 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            Container(
+                alignment: Alignment.center,
+                child: TextField(
+                  decoration: InputDecoration(hintText: "Name"),
+                  controller: nameHolder,
+                  onChanged: (text) {
+                    _setName(text);
+                  },
+                ),
+                width: MediaQuery.of(context).size.width * 0.5)
           ],
         ),
       ),
