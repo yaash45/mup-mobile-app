@@ -8,7 +8,7 @@ final databaseReference = FirebaseFirestore.instance;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(FirebaseInitializer());
+  runApp(MyApp()); // Skipping firebase initialization for now while testing
 }
 
 class FirebaseInitializer extends StatelessWidget {
@@ -53,7 +53,9 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'MUP App Home Page'),
+      home: MyHomePage(
+        title: "Dashboard",
+      ),
     );
   }
 }
@@ -165,10 +167,78 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: () => {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => AddNewDevicePage()))
+        },
+        tooltip: 'Add new device',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+      bottomNavigationBar: BottomNavigationBar(items: [
+        BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard), label: 'Dashboard'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.grading_sharp), label: 'System Monitor'),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.account_box), label: "My Account")
+      ]), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class AddNewDevicePage extends StatefulWidget {
+  @override
+  _AddNewDevicePageState createState() => _AddNewDevicePageState();
+}
+
+class _AddNewDevicePageState extends State {
+  String _imei = '';
+  String _serial = '';
+  String _name = '';
+
+  void onPressed() {
+    _imei = "hello";
+    _serial = "world";
+    _name = "yaash";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Add new device'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Padding(
+          padding: EdgeInsets.all(10.0),
+          child: Container(
+            child: Column(
+              children: [
+                TextField(
+                  decoration: InputDecoration(hintText: "IMEI"),
+                  keyboardType: TextInputType.number,
+                ),
+                TextField(
+                    decoration: InputDecoration(hintText: "Serial Number")),
+                TextField(
+                    decoration: InputDecoration(
+                      hintText: "Device name (optional)",
+                    ),
+                    keyboardType: TextInputType.name),
+                Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: ElevatedButton(
+                      onPressed: onPressed,
+                      child: Text("Add"),
+                    ))
+              ],
+            ),
+          )),
     );
   }
 }
