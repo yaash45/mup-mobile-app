@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'mup_firebase.dart';
 
 class AddNewDevicePage extends StatefulWidget {
   @override
