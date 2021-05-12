@@ -34,22 +34,21 @@ class _AddNewDevicePageState extends State {
   }
 
   void _addDevice() {
-    // setState(() {
-    //   // Push device info to firebase
-    //   databaseReference.collection("flutter_count").add({
-    //     "user": "user1",
-    //     "imei": _imei,
-    //     "serial": _serial,
-    //     "name": _name,
-    //     "timestamp": DateTime.now().millisecondsSinceEpoch,
-    //   }).then((value) {
-    //     print(value.id);
-    //   });
-    //   clearTextInput();
-    // });
-    _showToast(context);
-    clearTextInput();
-    Navigator.pop(context);
+    setState(() {
+      // Push device info to firebase
+      databaseReference.collection("devices").add({
+        "user": "test",
+        "imei": _imei,
+        "serial": _serial,
+        "name": _name,
+        "timestamp": DateTime.now().millisecondsSinceEpoch,
+      }).then((value) {
+        print(value.id);
+        clearTextInput();
+        _showToast(context);
+        Navigator.pop(context);
+      });
+    });
   }
 
   void _setImei(imei) {
