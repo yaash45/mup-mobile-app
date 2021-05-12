@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // Import the firebase_core plugin
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mup_app/login.dart';
 
 final databaseReference = FirebaseFirestore.instance;
 
@@ -53,7 +54,8 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'MUP App Home Page'),
+     // home: MyHomePage(title: 'MUP App Home Page'),
+        home: Login(),
     );
   }
 }
