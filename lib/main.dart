@@ -178,10 +178,57 @@ class _AddNewDevicePageState extends State {
   String _serial = '';
   String _name = '';
 
-  void onPressed() {
-    _imei = "hello";
-    _serial = "world";
-    _name = "yaash";
+  final imeiHolder = TextEditingController();
+  final serialHolder = TextEditingController();
+  final nameHolder = TextEditingController();
+
+  void clearTextInput() {
+    imeiHolder.clear();
+    serialHolder.clear();
+    nameHolder.clear();
+  }
+
+  void _showToast(BuildContext context) {
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text(
+            "Added device with IMEI = $_imei, Serial = $_serial, Name = $_name"),
+        action: SnackBarAction(
+            label: 'OK', onPressed: scaffold.hideCurrentSnackBar),
+      ),
+    );
+  }
+
+  void _addDevice() {
+    // setState(() {
+    //   // Push device info to firebase
+    //   databaseReference.collection("flutter_count").add({
+    //     "user": "user1",
+    //     "imei": _imei,
+    //     "serial": _serial,
+    //     "name": _name,
+    //     "timestamp": DateTime.now().millisecondsSinceEpoch,
+    //   }).then((value) {
+    //     print(value.id);
+    //   });
+    //   clearTextInput();
+    // });
+    _showToast(context);
+    clearTextInput();
+    Navigator.pop(context);
+  }
+
+  void _setImei(imei) {
+    _imei = imei;
+  }
+
+  void _setSerial(serial) {
+    _serial = serial;
+  }
+
+  void _setName(name) {
+    _name = name;
   }
 
   @override
@@ -204,18 +251,27 @@ class _AddNewDevicePageState extends State {
                 TextField(
                   decoration: InputDecoration(hintText: "IMEI"),
                   keyboardType: TextInputType.number,
+                  controller: imeiHolder,
+                  onChanged: _setImei,
                 ),
                 TextField(
-                    decoration: InputDecoration(hintText: "Serial Number")),
+                  decoration: InputDecoration(hintText: "Serial Number"),
+                  keyboardType: TextInputType.number,
+                  controller: serialHolder,
+                  onChanged: _setSerial,
+                ),
                 TextField(
-                    decoration: InputDecoration(
-                      hintText: "Device name (optional)",
-                    ),
-                    keyboardType: TextInputType.name),
+                  decoration: InputDecoration(
+                    hintText: "Device name (optional)",
+                  ),
+                  keyboardType: TextInputType.name,
+                  controller: nameHolder,
+                  onChanged: _setName,
+                ),
                 Padding(
                     padding: EdgeInsets.all(10.0),
                     child: ElevatedButton(
-                      onPressed: onPressed,
+                      onPressed: _addDevice,
                       child: Text("Add"),
                     ))
               ],
