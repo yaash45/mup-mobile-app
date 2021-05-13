@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'mup_firebase.dart';
+import '../backend/mup_firebase.dart';
 
 class AddNewDevicePage extends StatefulWidget {
   @override
@@ -35,14 +35,16 @@ class _AddNewDevicePageState extends State {
 
   void _addDevice() {
     setState(() {
-      // Push device info to firebase
-      databaseReference.collection("devices").add({
+      Map<String, dynamic> deviceData = {
         "user": "test",
         "imei": _imei,
         "serial": _serial,
         "name": _name,
         "timestamp": DateTime.now().millisecondsSinceEpoch,
-      }).then((value) {
+      };
+
+      // Push device info to firebase
+      insertObjectToFirestore('devices', deviceData).then((value) {
         print(value.id);
         clearTextInput();
         _showToast(context);
