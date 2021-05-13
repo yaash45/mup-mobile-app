@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.dashboard), label: 'Dashboard'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.grading_sharp), label: 'System Monitor'),
+                icon: Icon(Icons.grading_sharp), label: 'System Health'),
             BottomNavigationBarItem(
                 icon: Icon(Icons.account_box), label: "My Account")
           ]), // This trailing comma makes auto-formatting nicer for build methods.
