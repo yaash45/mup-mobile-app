@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../backend/mup_firebase.dart';
-import 'add_new_device.dart';
+import 'package:mup_app/pages/my_account.dart';
+import 'package:mup_app/pages/add_new_device.dart';
+import 'package:mup_app/pages/system_health.dart';
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -28,70 +29,54 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  String _name = "";
-
   final nameHolder = TextEditingController();
 
-  void clearTextInput() {
-    nameHolder.clear();
-  }
+  int _currentIndex = 0;
+  final List<Widget> _children = [Dashboard(), SystemHealthPage(), MyAccount()];
 
-  void _setName(text) {
-    _name = text;
+  void onTappedBar(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      body: _children[_currentIndex],
+
+      bottomNavigationBar: BottomNavigationBar(
+          onTap: onTappedBar,
+          currentIndex: _currentIndex,
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard), label: 'Dashboard'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.grading_sharp), label: 'System Monitor'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.account_box), label: "My Account")
+          ]), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class Dashboard extends StatefulWidget {
+  @override
+  _DashboardState createState() => _DashboardState();
+}
+
+class _DashboardState extends State<Dashboard> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Dashboard')),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times:',
+              'This is the dashboard',
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            Container(
-                alignment: Alignment.center,
-                child: TextField(
-                  decoration: InputDecoration(hintText: "Name"),
-                  controller: nameHolder,
-                  onChanged: (text) {
-                    _setName(text);
-                  },
-                ),
-                width: MediaQuery.of(context).size.width * 0.5)
           ],
         ),
       ),
@@ -103,14 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Add new device',
         child: Icon(Icons.add),
       ),
-      bottomNavigationBar: BottomNavigationBar(items: [
-        BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard), label: 'Dashboard'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.grading_sharp), label: 'System Monitor'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.account_box), label: "My Account")
-      ]), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
