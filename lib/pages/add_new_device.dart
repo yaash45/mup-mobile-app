@@ -14,6 +14,7 @@ class _AddNewDevicePageState extends State {
   final imeiHolder = TextEditingController();
   final serialHolder = TextEditingController();
   final nameHolder = TextEditingController();
+  final mupFirestore = new MupFirestore();
 
   void clearTextInput() {
     imeiHolder.clear();
@@ -44,7 +45,7 @@ class _AddNewDevicePageState extends State {
       };
 
       // Push device info to firebase
-      insertObjectToFirestore('devices', deviceData).then((value) {
+      mupFirestore.insertObject('devices', deviceData).then((value) {
         print(value.id);
         clearTextInput();
         _showToast(context);
