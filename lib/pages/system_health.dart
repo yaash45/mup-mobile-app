@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mup_app/backend/mup_firebase.dart';
 
@@ -9,15 +10,32 @@ class SystemHealthPage extends StatefulWidget {
 class _SystemHealthPageState extends State<SystemHealthPage> {
   final mupFirestore = new MupFirestore();
 
-  int _counter = 0;
+  List<Widget> _firestoreDataWidgets = [];
 
-  void _setData() {
-    _counter++;
+  List<Widget> _createFirestoreDataWidgets() {
+    return new List<Widget>.generate(
+        _firestoreDataWidgets.length, (index) => _firestoreDataWidgets[index]);
   }
 
-  void onPressed() {
+  void _appendData(String data) {
+    _firestoreDataWidgets.add(Text(data));
+  }
+
+  void _fetch() {
+    mupFirestore
+        .getObjectByCollection('devices')
+        .then((QuerySnapshot snapshot) {
+      snapshot.docs.forEach((element) {
+        setState(() {
+          _appendData(element.data().toString());
+        });
+      });
+    });
+  }
+
+  void _clear() {
     setState(() {
-      _setData();
+      _firestoreDataWidgets.clear();
     });
   }
 
@@ -30,11 +48,16 @@ class _SystemHealthPageState extends State<SystemHealthPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(padding: EdgeInsets.all(10.0), child: Text("$_counter")),
+            Column(children: _createFirestoreDataWidgets()),
             Container(
                 padding: EdgeInsets.all(10.0),
-                child:
-                    ElevatedButton(onPressed: onPressed, child: Text('Fetch'))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(onPressed: _fetch, child: Text('Fetch')),
+                    ElevatedButton(onPressed: _clear, child: Text('Clear')),
+                  ],
+                )),
           ],
         ),
       ),
