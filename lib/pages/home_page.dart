@@ -29,8 +29,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final nameHolder = TextEditingController();
-
   int _currentIndex = 0;
   final List<Widget> _children = [Dashboard(), SystemHealthPage(), MyAccount()];
 
