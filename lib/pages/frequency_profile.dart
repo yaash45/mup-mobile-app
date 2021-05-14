@@ -31,7 +31,27 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
     setState(() {});
   }
 
-  void _setFrequencyProfile() {}
+  void clearTextInput() {
+    customFieldHolder.clear();
+  }
+
+  void _showToast(BuildContext context) {
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content:
+            Text("Set Frequency Profile to $_messageFrequency Messages/Hour"),
+        action: SnackBarAction(
+            label: 'OK', onPressed: scaffold.hideCurrentSnackBar),
+      ),
+    );
+  }
+
+  void _setFrequencyProfile() {
+    clearTextInput();
+    _showToast(context);
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
