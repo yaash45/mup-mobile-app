@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mup_app/net/flutterfire.dart';
 import 'package:mup_app/testview.dart';
+import 'pages/home_page.dart';
+
 
 class Login extends StatefulWidget {
   @override
@@ -75,7 +77,9 @@ class _LoginState extends State<Login> {
                 onPressed: () async {
                   bool shouldNavigate = await signIn(_emailField.text, _passwordField.text);
                   if (shouldNavigate) {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => testView(),
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(
+                      title: "myapp"
+                    ),
                     ),
                     );
                   }
