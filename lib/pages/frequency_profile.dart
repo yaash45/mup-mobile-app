@@ -5,6 +5,7 @@ class FrequencyProfilePage extends StatefulWidget {
   _FrequencyProfilePageState createState() => _FrequencyProfilePageState();
 }
 
+//TODO: Isolate constants into separate file later
 const int HighFrequencyProfileValue = 30;
 const int MediumFrequencyProfileValue = 20;
 const int LowFrequencyProfileValue = 10;
@@ -12,6 +13,9 @@ const int LowFrequencyProfileValue = 10;
 // This is just a default value for the custom profile,
 // separate from the message frequency
 const int CustomFrequencyProfileValue = 0;
+
+// TODO: Check how to determine this later
+const double PricePerMessageInDollars = 0.50;
 
 class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
   int _value = HighFrequencyProfileValue;
@@ -158,7 +162,8 @@ class _BillingInformationState extends State<BillingInformation> {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('${(widget.messageFrequency * 0.55).toStringAsFixed(2)} \$/hour')
+          Text(
+              '${(widget.messageFrequency * PricePerMessageInDollars).toStringAsFixed(2)} \$/hour')
         ],
       ),
     ]);
