@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mup_app/pages/frequency_profile.dart';
 import 'package:mup_app/pages/my_account.dart';
 import 'package:mup_app/pages/add_new_device.dart';
 import 'package:mup_app/pages/system_health.dart';
@@ -64,6 +65,11 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  void _selectFrequencyProfilePage() {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => FrequencyProfilePage()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,6 +80,12 @@ class _DashboardState extends State<Dashboard> {
           children: <Widget>[
             Text(
               'This is the dashboard',
+            ),
+            Container(
+              child: ElevatedButton(
+                onPressed: _selectFrequencyProfilePage,
+                child: Text('Set Frequency Profile'),
+              ),
             ),
           ],
         ),
