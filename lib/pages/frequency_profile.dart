@@ -84,57 +84,31 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
                         padding: EdgeInsets.all(20.0),
                       ),
                       _custom
-                          ? TextField(
-                              decoration: InputDecoration(
-                                labelText: "Custom message frequency",
-                                hintText: "1-50",
-                                suffixText: "Messages/Hour",
-                                border: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: Colors.blue, width: 2.0),
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                // focusedBorder: OutlineInputBorder(
-                                //   borderSide: const BorderSide(
-                                //       color: Colors.blue, width: 2.0),
-                                //   borderRadius: BorderRadius.circular(12.0),
-                                // ),
-                              ),
-                              keyboardType: TextInputType.number,
-                              controller: customFieldHolder,
-                              onChanged: _setCustomValue,
-                            )
-                          : Column(
+                          ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                  Text('Selected Message Frequency:'),
-                                  Padding(
-                                    padding: EdgeInsets.all(10.0),
+                                TextField(
+                                  decoration: InputDecoration(
+                                    labelText: "Custom message frequency",
+                                    hintText: "1-50",
+                                    suffixText: "Messages/Hour",
+                                    border: OutlineInputBorder(
+                                      borderSide: const BorderSide(
+                                          color: Colors.blue, width: 2.0),
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
                                   ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('10'),
-                                      Text('Messages/Hour')
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.all(10.0),
-                                  ),
-                                  Text('Estimated bill (\$/month):'),
-                                  Padding(
-                                    padding: EdgeInsets.all(10.0),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('10'),
-                                      Text('Messages/Hour')
-                                    ],
-                                  ),
-                                ]),
+                                  keyboardType: TextInputType.number,
+                                  controller: customFieldHolder,
+                                  onChanged: _setCustomValue,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(10.0),
+                                ),
+                                BillingInformation(),
+                              ],
+                            )
+                          : BillingInformation(),
                       Padding(padding: EdgeInsets.all(10.0)),
                     ],
                   )),
@@ -143,5 +117,37 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
             ],
           ),
         ));
+  }
+}
+
+class BillingInformation extends StatefulWidget {
+  @override
+  _BillingInformationState createState() => _BillingInformationState();
+}
+
+class _BillingInformationState extends State<BillingInformation> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Selected Message Frequency:'),
+      Padding(
+        padding: EdgeInsets.all(10.0),
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [Text('10'), Text('Messages/Hour')],
+      ),
+      Padding(
+        padding: EdgeInsets.all(10.0),
+      ),
+      Text('Estimated bill (\$/month):'),
+      Padding(
+        padding: EdgeInsets.all(10.0),
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [Text('10'), Text('Messages/Hour')],
+      ),
+    ]);
   }
 }
