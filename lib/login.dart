@@ -92,7 +92,9 @@ class _LoginState extends State<Login> {
             ),
            TextButton(
               onPressed: (){
-                //TODO FORGOT PASSWORD SCREEN GOES HERE
+                Navigator.push(context, MaterialPageRoute(builder: (context) => testView()),
+                );
+                
               },
               child: Text(
                 'Create Account',
