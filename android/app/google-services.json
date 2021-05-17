@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "632714567995",
+    "project_id": "capstonemuop",
+    "storage_bucket": "capstonemuop.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:632714567995:android:60aba5331f312e9ea6571e",
+        "android_client_info": {
+          "package_name": "com.example.mup_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "632714567995-8m43r6ugfi1esug11c6mj4o30raujl5d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgg2gmBkL5zthoiFz2fycix_Hf0hwAFjI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "632714567995-8m43r6ugfi1esug11c6mj4o30raujl5d.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "632714567995-vpkh04lagf2fc8epe0p7n5jdllv6h4eg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mupApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
