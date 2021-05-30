@@ -47,6 +47,8 @@ class _LoginState extends State<Login> {
                     border: OutlineInputBorder(),
                     labelText: 'Email',
                     hintText: 'abc@gmail.com'),
+                keyboardType: TextInputType.emailAddress,
+                autocorrect: false,
               ),
             ),
             Padding(
