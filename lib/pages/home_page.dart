@@ -3,6 +3,7 @@ import 'package:mup_app/pages/login.dart';
 import 'package:mup_app/pages/frequency_profile.dart';
 import 'package:mup_app/pages/my_account.dart';
 import 'package:mup_app/pages/add_new_device.dart';
+import 'package:mup_app/pages/sensor_profile.dart';
 import 'package:mup_app/pages/system_health.dart';
 
 class MyApp extends StatelessWidget {
@@ -69,6 +70,11 @@ class _DashboardState extends State<Dashboard> {
         MaterialPageRoute(builder: (context) => FrequencyProfilePage()));
   }
 
+  void _setSensorProfilePage() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SensorProfilePage()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,11 +90,18 @@ class _DashboardState extends State<Dashboard> {
               'This is the dashboard',
             ),
             Container(
-              child: ElevatedButton(
-                onPressed: _selectFrequencyProfilePage,
-                child: Text('Set Frequency Profile'),
-              ),
-            ),
+                child: Column(
+              children: [
+                ElevatedButton(
+                  onPressed: _selectFrequencyProfilePage,
+                  child: Text('Set Frequency Profile'),
+                ),
+                ElevatedButton(
+                  onPressed: _setSensorProfilePage,
+                  child: Text('Set Sensor Profile'),
+                )
+              ],
+            )),
           ],
         ),
       ),
