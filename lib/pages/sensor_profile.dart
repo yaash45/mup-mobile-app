@@ -25,16 +25,18 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
               children: [
                 Align(
                     alignment: Alignment.center,
-                    child: Text('Please select a sensor setting:')),
+                    child: Text('Please select a sensor setting:',
+                        style: TextStyle(fontSize: 16))),
                 Padding(padding: EdgeInsets.all(5.0)),
                 Align(
                   alignment: Alignment.center,
                   child: CustomToggleButtons(
-                    fillColor: Colors.blue[50],
+                    fillColor: Colors.green[50],
                     splashColor: Colors.transparent,
-                    selectedColor: Colors.blue[500],
-                    selectedBorderColor: Colors.blue[500],
-                    borderWidth: 5.0,
+                    selectedColor: Colors.green[900],
+                    selectedBorderColor: Colors.green[500],
+                    color: Colors.grey[600],
+                    borderWidth: 2.5,
                     spacing: 10.0,
                     runSpacing: 10.0,
                     children: [
@@ -78,7 +80,11 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
                       });
                     },
                   ),
-                )
+                ),
+                ElevatedButton(
+                  child: Text('Save profile'),
+                  onPressed: () => {},
+                ),
               ],
             )));
   }
