@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mup_app/net/flutterfire.dart';
+import 'package:mup_app/backend/flutterfire.dart';
 import 'package:mup_app/testview.dart';
-import 'pages/home_page.dart';
-
+import 'home_page.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -31,8 +30,12 @@ class _LoginState extends State<Login> {
                     /*decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(50.0)),*/
-                    child: Image.asset('MUP.png', fit: BoxFit.fitWidth,height: 100,
-    width: 200,)),
+                    child: Image.asset(
+                      'MUP.png',
+                      fit: BoxFit.fitWidth,
+                      height: 100,
+                      width: 200,
+                    )),
               ),
             ),
             Padding(
@@ -60,7 +63,7 @@ class _LoginState extends State<Login> {
               ),
             ),
             TextButton(
-              onPressed: (){
+              onPressed: () {
                 //TODO FORGOT PASSWORD SCREEN GOES HERE
               },
               child: Text(
@@ -75,12 +78,14 @@ class _LoginState extends State<Login> {
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: TextButton(
                 onPressed: () async {
-                  bool shouldNavigate = await signIn(_emailField.text, _passwordField.text);
+                  bool shouldNavigate =
+                      await signIn(_emailField.text, _passwordField.text);
                   if (shouldNavigate) {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(
-                      title: "myapp"
-                    ),
-                    ),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyHomePage(title: "myapp"),
+                      ),
                     );
                   }
                 },
@@ -90,11 +95,12 @@ class _LoginState extends State<Login> {
                 ),
               ),
             ),
-           TextButton(
-              onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => testView()),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => testView()),
                 );
-                
               },
               child: Text(
                 'Create Account',
