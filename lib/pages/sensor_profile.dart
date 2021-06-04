@@ -23,44 +23,62 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Please select a sensor setting:'),
+                Align(
+                    alignment: Alignment.center,
+                    child: Text('Please select a sensor setting:')),
                 Padding(padding: EdgeInsets.all(5.0)),
-                CustomToggleButtons(
-                  fillColor: Colors.blue[50],
-                  splashColor: Colors.transparent,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      width: 100,
-                      child: Column(children: [
-                        Icon(Icons.thermostat_sharp),
-                        Text('Temperature'),
-                      ]),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      width: 100,
-                      child: Column(children: [
-                        Icon(Icons.visibility),
-                        Text('Vision'),
-                      ]),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      width: 100,
-                      child: Column(children: [
-                        Icon(Icons.water_damage_outlined),
-                        Text('Humidity'),
-                      ]),
-                    ),
-                  ],
-                  isSelected: _selections,
-                  onPressed: (int index) {
-                    setState(() {
-                      _selections[index] = !_selections[index];
-                    });
-                  },
-                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: CustomToggleButtons(
+                    fillColor: Colors.blue[50],
+                    splashColor: Colors.transparent,
+                    selectedColor: Colors.blue[500],
+                    selectedBorderColor: Colors.blue[500],
+                    borderWidth: 5.0,
+                    spacing: 10.0,
+                    runSpacing: 10.0,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(5.0),
+                        width: 100,
+                        child: Column(children: [
+                          Icon(Icons.thermostat_sharp),
+                          Text('Temperature'),
+                        ]),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(5.0),
+                        width: 100,
+                        child: Column(children: [
+                          Icon(Icons.visibility),
+                          Text('Vision'),
+                        ]),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(5.0),
+                        width: 100,
+                        child: Column(children: [
+                          Icon(Icons.water_damage_outlined),
+                          Text('Humidity'),
+                        ]),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(5.0),
+                        width: 100,
+                        child: Column(children: [
+                          Icon(Icons.waves),
+                          Text('Vibration'),
+                        ]),
+                      ),
+                    ],
+                    isSelected: _selections,
+                    onPressed: (int index) {
+                      setState(() {
+                        _selections[index] = !_selections[index];
+                      });
+                    },
+                  ),
+                )
               ],
             )));
   }
