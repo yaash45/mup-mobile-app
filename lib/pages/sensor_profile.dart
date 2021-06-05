@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:customtogglebuttons/customtogglebuttons.dart';
 
-const int NumSensors = 4;
+const int NumSensors = 5;
 
 class SensorProfilePage extends StatefulWidget {
   SensorProfilePage({Key key}) : super(key: key);
@@ -11,7 +11,43 @@ class SensorProfilePage extends StatefulWidget {
 }
 
 class _SensorProfilePageState extends State<SensorProfilePage> {
-  List<bool> _selections = List<bool>.generate(NumSensors, (index) => true);
+  List<bool> _selections = List<bool>.generate(NumSensors, (index) => false);
+  bool _atLeastOneSensor = false;
+
+  void _saveProfile() {
+    for (var i = 0; i < _selections.length; i++) {
+      if (_selections[i]) {
+        _atLeastOneSensor = true;
+      }
+    }
+    if (_atLeastOneSensor) {
+      _showToast(context);
+      Navigator.pop(context);
+    }
+  }
+
+  void _showToast(BuildContext context) {
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text("Success: Sensor Profile Set"),
+        action: SnackBarAction(
+            label: 'OK', onPressed: scaffold.hideCurrentSnackBar),
+      ),
+    );
+  }
+
+  void _disableVisionProcessor() {
+    _selections[1] = false;
+  }
+
+  void _disableHumiditySensor() {
+    _selections[2] = false;
+  }
+
+  void _disableLowPowerMode() {
+    _selections[4] = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +63,7 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
                     alignment: Alignment.center,
                     child: Text('Please select a sensor setting:',
                         style: TextStyle(fontSize: 16))),
-                Padding(padding: EdgeInsets.all(5.0)),
+                Padding(padding: EdgeInsets.all(20.0)),
                 Align(
                   alignment: Alignment.center,
                   child: CustomToggleButtons(
@@ -39,6 +75,7 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
                     borderWidth: 2.5,
                     spacing: 10.0,
                     runSpacing: 10.0,
+                    constraints: BoxConstraints(minWidth: 170),
                     children: [
                       Container(
                         padding: EdgeInsets.all(5.0),
@@ -72,18 +109,36 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
                           Text('Vibration'),
                         ]),
                       ),
+                      Container(
+                        padding: EdgeInsets.all(5.0),
+                        width: 100,
+                        child: Column(children: [
+                          Icon(Icons.power),
+                          Text('Power Saver'),
+                        ]),
+                      ),
                     ],
                     isSelected: _selections,
                     onPressed: (int index) {
                       setState(() {
+                        // TODO: Figure out what sensors to select based on profile
                         _selections[index] = !_selections[index];
+                        if (index == 4) {
+                          _disableVisionProcessor(); //Turn off camera
+                          _disableHumiditySensor(); //Turn off humidity
+                        } else {
+                          _disableLowPowerMode();
+                        }
                       });
                     },
                   ),
                 ),
+                Padding(
+                  padding: EdgeInsets.all(20.0),
+                ),
                 ElevatedButton(
                   child: Text('Save profile'),
-                  onPressed: () => {},
+                  onPressed: _saveProfile,
                 ),
               ],
             )));
