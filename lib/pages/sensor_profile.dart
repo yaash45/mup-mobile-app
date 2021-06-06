@@ -59,11 +59,12 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Spacer(flex: 1),
                 Align(
                     alignment: Alignment.center,
                     child: Text('Please select a sensor setting:',
                         style: TextStyle(fontSize: 16))),
-                Padding(padding: EdgeInsets.all(20.0)),
+                Spacer(flex: 1),
                 Align(
                   alignment: Alignment.center,
                   child: CustomToggleButtons(
@@ -133,12 +134,15 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
                     },
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(20.0),
+                Spacer(
+                  flex: 6,
                 ),
                 ElevatedButton(
                   child: Text('Save profile'),
                   onPressed: _saveProfile,
+                ),
+                Spacer(
+                  flex: 1,
                 ),
               ],
             )));
