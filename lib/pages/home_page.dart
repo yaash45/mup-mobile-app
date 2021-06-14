@@ -5,6 +5,7 @@ import 'package:mup_app/pages/my_account.dart';
 import 'package:mup_app/pages/add_new_device.dart';
 import 'package:mup_app/pages/sensor_profile.dart';
 import 'package:mup_app/pages/system_health.dart';
+import 'package:mup_app/pages/device_info.dart';
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -31,7 +32,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
-  final List<Widget> _children = [Dashboard(), SystemHealthPage(), MyAccount()];
+  final List<Widget> _children = [Dashboard(), SystemHealthPage()
+// , MyAccount()
+  , DeviceInfo()
+  ];
 
   void onTappedBar(int index) {
     setState(() {
@@ -53,7 +57,9 @@ class _MyHomePageState extends State<MyHomePage> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.grading_sharp), label: 'System Health'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.account_box), label: "My Account")
+                icon: Icon(Icons.account_box), label: "My Account"),
+           // BottomNavigationBarItem(
+             //   icon: Icon(Icons.important_devices), label: "Device Info")  
           ]), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
