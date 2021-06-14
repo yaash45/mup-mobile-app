@@ -42,7 +42,10 @@ class _SystemHealthPageState extends State<SystemHealthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('System Health')),
+      appBar: AppBar(
+        title: Text('System Health'),
+        leading: Container(),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

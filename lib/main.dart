@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 // Import the firebase_core plugin
 import 'package:firebase_core/firebase_core.dart';
 //import 'pages/home_page.dart';
-import 'package:mup_app/login.dart';
 import 'package:mup_app/pages/home_page.dart';
 
 void main() {
