@@ -52,7 +52,15 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Select Sensor Profile')),
+        appBar: AppBar(
+          title: Text('Select Sensor Profile'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
         body: Container(
             padding: EdgeInsets.all(20.0),
             child: Column(

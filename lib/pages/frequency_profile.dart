@@ -59,7 +59,7 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
         appBar: AppBar(
           title: Text("Frequency Profile"),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back_ios_new_rounded),
             onPressed: () {
               Navigator.pop(context);
             },

@@ -1,36 +1,16 @@
 //import 'package:beautiful_list/model/lesson.dart';
 import 'package:flutter/material.dart';
+
 //import 'package:beautiful_list/detail_page.dart';
-
-class MyAccount extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'Flutter Demo',
-     // theme: new ThemeData(
-        //  primaryColor: Color.fromRGBO(58, 66, 86, 1.0), fontFamily: 'Raleway'),
-      home: new MyAccount2(title: 'Account'),
-      // home: DetailPage(),
-    );
-  }
-}
-
-
-
-class MyAccount2 extends StatefulWidget {
-  MyAccount2({Key key, this.title}) : super(key: key);
-
-  final String title;
+class MyAccount extends StatefulWidget {
+  MyAccount({Key key}) : super(key: key);
 
   @override
-  _MyAccount2State createState() => _MyAccount2State();
+  _MyAccountState createState() => _MyAccountState();
 }
 
-class _MyAccount2State extends State<MyAccount2> {
+class _MyAccountState extends State<MyAccount> {
   List lessons;
-
- 
 
   @override
   Widget build(BuildContext context) {
@@ -43,16 +23,16 @@ class _MyAccount2State extends State<MyAccount2> {
                 border: new Border(
                     right: new BorderSide(width: 1.0, color: Colors.grey))),
             child: //Icon(Icons.account_box, color: Colors.white),
-            Text("Username",
-            style:TextStyle(fontWeight: FontWeight.bold)),
+                Text("Username", style: TextStyle(fontWeight: FontWeight.bold)),
           ),
           title: Text(
-           "John Doe",
-            style: TextStyle(color: Colors.grey[700], fontWeight: FontWeight.w300),
+            "John Doe",
+            style:
+                TextStyle(color: Colors.grey[700], fontWeight: FontWeight.w300),
           ),
           // subtitle: Text("Intermediate", style: TextStyle(color: Colors.white)),
 
-      /*    subtitle: Row(
+          /*    subtitle: Row(
             children: <Widget>[
               Expanded(
                   flex: 1,
@@ -96,26 +76,15 @@ class _MyAccount2State extends State<MyAccount2> {
         },
       ),
     );
-   
+
     final topAppBar = AppBar(
-      elevation: 0.1,
-      backgroundColor: Color.fromRGBO(28, 124, 219, 1),
-      title: Text(widget.title),
-      actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.list),
-          onPressed: () {},
-        )
-      ],
+      title: Text('My Account'),
+      leading: Container(),
     );
 
     return Scaffold(
-      backgroundColor: Color.fromRGBO(58, 66, 86, 0.2),
       appBar: topAppBar,
       body: makeBody,
-    //  bottomNavigationBar: makeBottom,
     );
   }
 }
-
-

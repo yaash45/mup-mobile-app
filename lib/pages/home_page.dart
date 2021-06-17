@@ -32,10 +32,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
-  final List<Widget> _children = [Dashboard(), SystemHealthPage()
-// , MyAccount()
-  , DeviceInfo()
-  ];
+  final List<Widget> _children = [Dashboard(), SystemHealthPage(), MyAccount()];
 
   void onTappedBar(int index) {
     setState(() {
@@ -58,8 +55,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 icon: Icon(Icons.grading_sharp), label: 'System Health'),
             BottomNavigationBarItem(
                 icon: Icon(Icons.account_box), label: "My Account"),
-           // BottomNavigationBarItem(
-             //   icon: Icon(Icons.important_devices), label: "Device Info")  
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.important_devices), label: "Device Info")
           ]), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
@@ -71,6 +68,11 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  void _deviceInfoPage() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (contect) => DeviceInfo()));
+  }
+
   void _selectFrequencyProfilePage() {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => FrequencyProfilePage()));
@@ -96,12 +98,13 @@ class _DashboardState extends State<Dashboard> {
               height: 150.0,
               width: 350.0,
               decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.all(Radius.circular(10.0))),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
-                  Text("Device 1",
+                  Text(
+                    "Device 1",
                     style: TextStyle(color: Colors.white, fontSize: 22),
                     textAlign: TextAlign.center,
                   ),
@@ -111,16 +114,19 @@ class _DashboardState extends State<Dashboard> {
                       Center(
                         child: GestureDetector(
                           onTap: () {
-                            //NAVIGATION TO DEVICE INFO PAGE GOES HERE
+                            _deviceInfoPage();
                           },
                           child: Container(
                             height: 100.0,
                             width: 100.0,
                             color: Colors.grey,
                             alignment: Alignment.center,
-                            child: Text("Device Info",
-                              style: TextStyle(color: Colors.white, fontSize: 16),
-                              textAlign: TextAlign.center,),
+                            child: Text(
+                              "Device Info",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
@@ -134,9 +140,12 @@ class _DashboardState extends State<Dashboard> {
                             width: 100.0,
                             color: Colors.grey,
                             alignment: Alignment.center,
-                            child: Text("Frequency Profile",
-                              style: TextStyle(color: Colors.white, fontSize: 16),
-                              textAlign: TextAlign.center,),
+                            child: Text(
+                              "Frequency Profile",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
@@ -150,9 +159,12 @@ class _DashboardState extends State<Dashboard> {
                             width: 100.0,
                             color: Colors.grey,
                             alignment: Alignment.center,
-                            child: Text("Sensor Profile",
-                              style: TextStyle(color: Colors.white, fontSize: 16),
-                              textAlign: TextAlign.center,),
+                            child: Text(
+                              "Sensor Profile",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
@@ -163,7 +175,6 @@ class _DashboardState extends State<Dashboard> {
             ),
 
             // MORE DEVICE WIDGETS CAN BE ADDED HERE
-
           ],
         ),
       ),

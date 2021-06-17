@@ -268,27 +268,21 @@ body: Container(
 
         home: Scaffold(
             appBar: AppBar(
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios_new_rounded),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
               elevation: 2.0,
-              backgroundColor: Colors.white,
-              title: Text('Dashboard',
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 30.0)),
+              title: Text('Device Info'),
               actions: <Widget>[
                 Container(
                   margin: EdgeInsets.only(right: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Text('beclothed.com',
-                          style: TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14.0)),
-                      Icon(Icons.arrow_drop_down, color: Colors.black54)
-                    ],
+                    children: <Widget>[],
                   ),
                 )
               ],
