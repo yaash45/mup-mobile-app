@@ -90,24 +90,80 @@ class _DashboardState extends State<Dashboard> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Text(
-              'This is the dashboard',
-            ),
             Container(
-                child: Column(
-              children: [
-                ElevatedButton(
-                  onPressed: _selectFrequencyProfilePage,
-                  child: Text('Set Frequency Profile'),
-                ),
-                ElevatedButton(
-                  onPressed: _setSensorProfilePage,
-                  child: Text('Set Sensor Profile'),
-                )
-              ],
-            )),
+              height: 150.0,
+              width: 350.0,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.all(Radius.circular(10.0))),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Text("Device 1",
+                    style: TextStyle(color: Colors.white, fontSize: 22),
+                    textAlign: TextAlign.center,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            //NAVIGATION TO DEVICE INFO PAGE GOES HERE
+                          },
+                          child: Container(
+                            height: 100.0,
+                            width: 100.0,
+                            color: Colors.grey,
+                            alignment: Alignment.center,
+                            child: Text("Device Info",
+                              style: TextStyle(color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,),
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            _selectFrequencyProfilePage();
+                          },
+                          child: Container(
+                            height: 100.0,
+                            width: 100.0,
+                            color: Colors.grey,
+                            alignment: Alignment.center,
+                            child: Text("Frequency Profile",
+                              style: TextStyle(color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,),
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            _setSensorProfilePage();
+                          },
+                          child: Container(
+                            height: 100.0,
+                            width: 100.0,
+                            color: Colors.grey,
+                            alignment: Alignment.center,
+                            child: Text("Sensor Profile",
+                              style: TextStyle(color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+
+            // MORE DEVICE WIDGETS CAN BE ADDED HERE
+
           ],
         ),
       ),
