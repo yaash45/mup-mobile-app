@@ -6,17 +6,22 @@ import 'package:mup_app/pages/add_new_device.dart';
 import 'package:mup_app/pages/sensor_profile.dart';
 import 'package:mup_app/pages/system_health.dart';
 import 'package:mup_app/pages/device_info.dart';
+import 'package:provider/provider.dart';
+import 'package:mup_app/states/CurrentUser.dart';
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MUP App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider(
+      create: (context) => CurrentUser(),
+      child: MaterialApp(
+        title: 'MUP App',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: Login(),
       ),
-      home: Login(),
     );
   }
 }
