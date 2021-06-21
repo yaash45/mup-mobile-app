@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:customtogglebuttons/customtogglebuttons.dart';
+import 'package:mup_app/assets/appbar.dart';
 
 const int NumSensors = 5;
 
@@ -52,14 +53,9 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Select Sensor Profile'),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
+        appBar: MupAppBar(
+          'Sensor Profile',
+          leadingBackButton: true,
         ),
         body: Container(
             padding: EdgeInsets.all(20.0),

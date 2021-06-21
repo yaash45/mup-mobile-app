@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mup_app/assets/appbar.dart';
 import '../backend/mup_firebase.dart';
 
 class AddNewDevicePage extends StatefulWidget {
@@ -80,14 +81,9 @@ class _AddNewDevicePageState extends State {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Add new device'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+      appBar: MupAppBar(
+        'Add new device',
+        leadingBackButton: true,
       ),
       body: Padding(
           padding: EdgeInsets.all(10.0),

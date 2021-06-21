@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mup_app/assets/appbar.dart';
 
 class FrequencyProfilePage extends StatefulWidget {
   @override
@@ -56,14 +57,9 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Frequency Profile"),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new_rounded),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
+        appBar: MupAppBar(
+          'Frequency Profile',
+          leadingBackButton: true,
         ),
         body: Container(
           padding: EdgeInsets.all(20.0),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mup_app/assets/appbar.dart';
 import 'package:mup_app/pages/login.dart';
 import 'package:mup_app/pages/frequency_profile.dart';
 import 'package:mup_app/pages/my_account.dart';
@@ -86,9 +87,27 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Dashboard'),
-        leading: Container(),
+      backgroundColor: Colors.white,
+      appBar: MupAppBar(
+        'Devices',
+        actions: [
+          IconButton(
+            splashRadius: 28,
+            alignment: Alignment.center,
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => AddNewDevicePage()));
+            },
+            icon: Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
+            iconSize: 28,
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
+          ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -177,14 +196,6 @@ class _DashboardState extends State<Dashboard> {
             // MORE DEVICE WIDGETS CAN BE ADDED HERE
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddNewDevicePage()))
-        },
-        tooltip: 'Add new device',
-        child: Icon(Icons.add),
       ),
     );
   }

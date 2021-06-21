@@ -1,5 +1,6 @@
 //import 'package:beautiful_list/model/lesson.dart';
 import 'package:flutter/material.dart';
+import 'package:mup_app/assets/appbar.dart';
 
 //import 'package:beautiful_list/detail_page.dart';
 class MyAccount extends StatefulWidget {
@@ -77,10 +78,7 @@ class _MyAccountState extends State<MyAccount> {
       ),
     );
 
-    final topAppBar = AppBar(
-      title: Text('My Account'),
-      leading: Container(),
-    );
+    final topAppBar = MupAppBar('My Account');
 
     return Scaffold(
       appBar: topAppBar,
