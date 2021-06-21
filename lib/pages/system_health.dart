@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mup_app/assets/appbar.dart';
+import 'package:mup_app/templates/appbar.dart';
 import 'package:mup_app/backend/mup_firebase.dart';
 
 class SystemHealthPage extends StatefulWidget {

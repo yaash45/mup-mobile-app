@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mup_app/assets/appbar.dart';
+import 'package:mup_app/templates/appbar.dart';
 //import 'package:permission/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_sparkline/flutter_sparkline.dart';

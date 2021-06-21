@@ -1,6 +1,6 @@
 //import 'package:beautiful_list/model/lesson.dart';
 import 'package:flutter/material.dart';
-import 'package:mup_app/assets/appbar.dart';
+import 'package:mup_app/templates/appbar.dart';
 
 //import 'package:beautiful_list/detail_page.dart';
 class MyAccount extends StatefulWidget {

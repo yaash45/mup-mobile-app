@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mup_app/assets/appbar.dart';
+import 'package:mup_app/templates/appbar.dart';
 import '../backend/mup_firebase.dart';
 
 class AddNewDevicePage extends StatefulWidget {

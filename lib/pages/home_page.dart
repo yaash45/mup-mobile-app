@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mup_app/assets/appbar.dart';
+import 'package:mup_app/templates/appbar.dart';
 import 'package:mup_app/pages/login.dart';
 import 'package:mup_app/pages/frequency_profile.dart';
 import 'package:mup_app/pages/my_account.dart';

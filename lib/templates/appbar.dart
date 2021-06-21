@@ -28,7 +28,7 @@ class MupAppBar extends StatelessWidget with PreferredSizeWidget {
               },
             )
           : Container(),
-      backgroundColor: Colors.blue,
+      backgroundColor: Color.fromARGB(255, 77, 108, 250),
       elevation: 0,
       actions: this.actions,
     );

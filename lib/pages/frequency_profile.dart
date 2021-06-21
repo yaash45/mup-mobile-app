@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mup_app/assets/appbar.dart';
+import 'package:mup_app/templates/appbar.dart';
 
 class FrequencyProfilePage extends StatefulWidget {
   @override
