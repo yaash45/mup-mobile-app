@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mup_app/templates/appbar.dart';
+import 'package:mup_app/templates/colors.dart';
 import '../backend/mup_firebase.dart';
 
 class AddNewDevicePage extends StatefulWidget {
@@ -91,8 +92,8 @@ class _AddNewDevicePageState extends State {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Spacer(
-                  flex: 1,
+                Padding(
+                  padding: EdgeInsets.all(10),
                 ),
                 TextField(
                   decoration: InputDecoration(
@@ -109,8 +110,8 @@ class _AddNewDevicePageState extends State {
                   controller: imeiHolder,
                   onChanged: _setImei,
                 ),
-                Spacer(
-                  flex: 1,
+                Padding(
+                  padding: EdgeInsets.all(10),
                 ),
                 TextField(
                   decoration: InputDecoration(
@@ -127,8 +128,8 @@ class _AddNewDevicePageState extends State {
                   controller: serialHolder,
                   onChanged: _setSerial,
                 ),
-                Spacer(
-                  flex: 1,
+                Padding(
+                  padding: EdgeInsets.all(10),
                 ),
                 TextField(
                   decoration: InputDecoration(
@@ -145,15 +146,19 @@ class _AddNewDevicePageState extends State {
                   controller: nameHolder,
                   onChanged: _setName,
                 ),
-                Spacer(
-                  flex: 10,
+                Padding(
+                  padding: EdgeInsets.all(10),
                 ),
-                ElevatedButton(
-                  onPressed: _addDevice,
-                  child: Text("Add"),
-                ),
-                Spacer(
-                  flex: 2,
+                SizedBox(
+                  child: ElevatedButton(
+                    onPressed: _addDevice,
+                    child: Text("Add"),
+                    style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(MupColors.mainTheme)),
+                  ),
+                  height: 50,
+                  width: double.infinity,
                 ),
               ],
             ),
