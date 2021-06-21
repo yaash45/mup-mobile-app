@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 //import 'pages/home_page.dart';
 import 'package:mup_app/pages/home_page.dart';
+import 'package:mup_app/pages/root.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,7 @@ class FirebaseInitializer extends StatelessWidget {
 
           if (snapshot.connectionState == ConnectionState.done) {
             // Upon successful resolution of the future, launch the app main page
+            //return MyApp();
             return MyApp();
           }
 

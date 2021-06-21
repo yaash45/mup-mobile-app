@@ -9,8 +9,16 @@ import 'package:mup_app/pages/device_info.dart';
 import 'package:provider/provider.dart';
 import 'package:mup_app/states/CurrentUser.dart';
 
+enum AuthStatus {
+  unAuthenticated,
+  Authenticated,
+}
+
+ AuthStatus _authStatus = AuthStatus.unAuthenticated;
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -20,7 +28,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: Login(),
+       // home: Login(),
+       home: authWidget(),
       ),
     );
   }
@@ -37,6 +46,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
+ 
   final List<Widget> _children = [Dashboard(), SystemHealthPage()
 // , MyAccount()
   , DeviceInfo()
@@ -50,6 +60,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+   
+   
+
     return Scaffold(
       body: _children[_currentIndex],
 
@@ -86,8 +99,31 @@ class _DashboardState extends State<Dashboard> {
         context, MaterialPageRoute(builder: (context) => SensorProfilePage()));
   }
 
+   @override
+    void didChangeDependencies() async {
+      // TODO: implement didChangeDependencies
+      super.didChangeDependencies();
+       print("did change dependencieees");
+      //get the state, check the user, set AuthStatus based on state
+      CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+      String _returnString = await _currentuser.onStartUp();
+
+      if (_returnString == 'success') {
+        setState(() {
+           _authStatus = AuthStatus.Authenticated;  
+              });
+       
+
+      }
+
+
+
+    }
+
   @override
   Widget build(BuildContext context) {
+    //CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+   // print(_currentuser.getCurrentUser.email);
     return Scaffold(
       appBar: AppBar(
         title: Text('Dashboard'),
@@ -126,4 +162,22 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+}
+
+
+ Widget authWidget(){
+  
+    Widget retVal;
+   
+    switch (_authStatus) {
+      case  AuthStatus.unAuthenticated:
+        retVal = Login();
+        break;
+      case  AuthStatus.Authenticated:
+        retVal = MyHomePage(title: "myapp");
+        break;
+      default:
+    }
+    return retVal;
+
 }

@@ -5,16 +5,15 @@ class UserModel {
   String email;
   Timestamp accountCreated;
   String fullName;
-  String groupId;
-  String notifToken;
+  //Notif
+  //Devicelist
+  
 
   UserModel({
     this.uid,
     this.email,
     this.accountCreated,
     this.fullName,
-    this.groupId,
-    this.notifToken,
   });
 
  

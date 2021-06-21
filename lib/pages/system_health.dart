@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mup_app/backend/mup_firebase.dart';
+import 'package:mup_app/states/CurrentUser.dart';
+import 'package:provider/provider.dart';
 
 class SystemHealthPage extends StatefulWidget {
   @override
