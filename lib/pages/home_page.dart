@@ -7,6 +7,8 @@ import 'package:mup_app/pages/add_new_device.dart';
 import 'package:mup_app/pages/sensor_profile.dart';
 import 'package:mup_app/pages/system_health.dart';
 import 'package:mup_app/pages/device_info.dart';
+import 'package:mup_app/templates/colors.dart';
+import 'package:ff_navigation_bar/ff_navigation_bar.dart';
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -45,20 +47,38 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _children[_currentIndex],
-
-      bottomNavigationBar: BottomNavigationBar(
-          onTap: onTappedBar,
-          currentIndex: _currentIndex,
-          items: [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard), label: 'Dashboard'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.grading_sharp), label: 'System Health'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.account_box), label: "My Account"),
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.important_devices), label: "Device Info")
-          ]), // This trailing comma makes auto-formatting nicer for build methods.
+      bottomNavigationBar: FFNavigationBar(
+        theme: FFNavigationBarTheme(
+          barBackgroundColor: Colors.white,
+          selectedItemBorderColor: Colors.white,
+          selectedItemBackgroundColor: MupColors.mainTheme,
+          selectedItemIconColor: Colors.white,
+          selectedItemLabelColor: Colors.black,
+        ),
+        selectedIndex: _currentIndex,
+        onSelectTab: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: [
+          FFNavigationBarItem(
+            iconData: Icons.list_alt_rounded,
+            label: 'Devices',
+            animationDuration: Duration(milliseconds: 1500),
+          ),
+          FFNavigationBarItem(
+            iconData: Icons.grading_sharp,
+            label: 'System Health',
+            animationDuration: Duration(milliseconds: 1500),
+          ),
+          FFNavigationBarItem(
+            iconData: Icons.account_box_rounded,
+            label: 'My Account',
+            animationDuration: Duration(milliseconds: 1500),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -87,7 +107,6 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: MupAppBar(
         'Devices',
         actions: [
