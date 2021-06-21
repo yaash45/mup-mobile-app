@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'MUP App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: MupColors.createMaterialColor(MupColors.mainTheme),
       ),
       home: Login(),
     );
