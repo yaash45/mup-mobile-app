@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mup_app/templates/colors.dart';
 
 class MupAppBar extends StatelessWidget with PreferredSizeWidget {
   MupAppBar(this.title, {Key key, this.leadingBackButton, this.actions})
@@ -28,7 +29,7 @@ class MupAppBar extends StatelessWidget with PreferredSizeWidget {
               },
             )
           : Container(),
-      backgroundColor: Color.fromARGB(255, 77, 108, 250),
+      backgroundColor: MupColors.mainTheme,
       elevation: 0,
       actions: this.actions,
     );
