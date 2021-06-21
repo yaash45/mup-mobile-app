@@ -89,132 +89,139 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  void _deviceInfoPage() {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: MupAppBar(
+          'Devices',
+          actions: [
+            IconButton(
+              splashRadius: 28,
+              alignment: Alignment.center,
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AddNewDevicePage()));
+              },
+              icon: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              iconSize: 28,
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
+            ),
+          ],
+        ),
+        body: MupDeviceCard());
+  }
+}
+
+class MupDeviceCard extends StatelessWidget {
+  const MupDeviceCard({Key key}) : super(key: key);
+
+  void _deviceInfoPage(BuildContext context) {
     Navigator.push(
         context, MaterialPageRoute(builder: (contect) => DeviceInfo()));
   }
 
-  void _selectFrequencyProfilePage() {
+  void _selectFrequencyProfilePage(BuildContext context) {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => FrequencyProfilePage()));
   }
 
-  void _setSensorProfilePage() {
+  void _setSensorProfilePage(BuildContext context) {
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => SensorProfilePage()));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MupAppBar(
-        'Devices',
-        actions: [
-          IconButton(
-            splashRadius: 28,
-            alignment: Alignment.center,
-            onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => AddNewDevicePage()));
-            },
-            icon: Icon(
-              Icons.add,
-              color: Colors.white,
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Container(
+            height: 150.0,
+            width: 350.0,
+            decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.all(Radius.circular(10.0))),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Text(
+                  "Device 1",
+                  style: TextStyle(color: Colors.white, fontSize: 22),
+                  textAlign: TextAlign.center,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          _deviceInfoPage(context);
+                        },
+                        child: Container(
+                          height: 100.0,
+                          width: 100.0,
+                          color: Colors.grey,
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Device Info",
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          _selectFrequencyProfilePage(context);
+                        },
+                        child: Container(
+                          height: 100.0,
+                          width: 100.0,
+                          color: Colors.grey,
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Frequency Profile",
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          _setSensorProfilePage(context);
+                        },
+                        child: Container(
+                          height: 100.0,
+                          width: 100.0,
+                          color: Colors.grey,
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Sensor Profile",
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
-            iconSize: 28,
           ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Container(
-              height: 150.0,
-              width: 350.0,
-              decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.all(Radius.circular(10.0))),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  Text(
-                    "Device 1",
-                    style: TextStyle(color: Colors.white, fontSize: 22),
-                    textAlign: TextAlign.center,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            _deviceInfoPage();
-                          },
-                          child: Container(
-                            height: 100.0,
-                            width: 100.0,
-                            color: Colors.grey,
-                            alignment: Alignment.center,
-                            child: Text(
-                              "Device Info",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            _selectFrequencyProfilePage();
-                          },
-                          child: Container(
-                            height: 100.0,
-                            width: 100.0,
-                            color: Colors.grey,
-                            alignment: Alignment.center,
-                            child: Text(
-                              "Frequency Profile",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            _setSensorProfilePage();
-                          },
-                          child: Container(
-                            height: 100.0,
-                            width: 100.0,
-                            color: Colors.grey,
-                            alignment: Alignment.center,
-                            child: Text(
-                              "Sensor Profile",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ),
 
-            // MORE DEVICE WIDGETS CAN BE ADDED HERE
-          ],
-        ),
+          // MORE DEVICE WIDGETS CAN BE ADDED HERE
+        ],
       ),
     );
   }
