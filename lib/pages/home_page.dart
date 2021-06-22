@@ -151,10 +151,17 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Future<void> _refreshDeviceList() async {
+    //TODO: Replace this with logic to obtain data from database
     await Future.delayed(Duration(milliseconds: 500));
     setState(() {
       _deviceNames.add("test-${_deviceNames.length}");
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _createDeviceList();
   }
 
   @override
