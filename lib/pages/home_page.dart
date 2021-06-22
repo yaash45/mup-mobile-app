@@ -89,6 +89,74 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  final List<String> _deviceNames = <String>[];
+
+  // https://blog.usejournal.com/implementing-swipe-to-delete-in-flutter-a742e041c5dd
+  Widget stackBehindDismiss() {
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: EdgeInsets.only(right: 25.0),
+      color: Colors.red,
+      child: Icon(
+        Icons.delete_outline_rounded,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  void _deleteDevice(index) {
+    String deletedDeviceName = _deviceNames[index];
+    setState(() {
+      _deviceNames.removeAt(index);
+    });
+
+    // Then show a snackbar.
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(deletedDeviceName + " deleted")));
+  }
+
+  List<Widget> _createDeviceList() {
+    return new List<Widget>.generate(
+        _deviceNames.length,
+        (index) => Dismissible(
+              confirmDismiss: (direction) async {
+                return await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Confirm delete'),
+                        content: Text(
+                            "Are you sure you wish to delete ${_deviceNames[index]}?"),
+                        actions: <Widget>[
+                          TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text("DELETE",
+                                  style: TextStyle(color: Colors.red))),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text("CANCEL",
+                                style: TextStyle(color: Colors.grey)),
+                          ),
+                        ],
+                      );
+                    });
+              },
+              key: Key(_deviceNames[index]),
+              background: stackBehindDismiss(),
+              onDismissed: (direction) {
+                _deleteDevice(index);
+              },
+              child: MupDeviceCard(name: _deviceNames[index]),
+            ));
+  }
+
+  Future<void> _refreshDeviceList() async {
+    await Future.delayed(Duration(milliseconds: 500));
+    setState(() {
+      _deviceNames.add("test-${_deviceNames.length}");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,112 +183,89 @@ class _DashboardState extends State<Dashboard> {
             ),
           ],
         ),
-        body: MupDeviceCard());
+        body: RefreshIndicator(
+          onRefresh: _refreshDeviceList,
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+            scrollDirection: Axis.vertical,
+            children: _createDeviceList(),
+          ),
+        ));
   }
 }
 
+void _deviceInfoPage(BuildContext context) {
+  Navigator.push(
+      context, MaterialPageRoute(builder: (contect) => DeviceInfo()));
+}
+
+void _selectFrequencyProfilePage(BuildContext context) {
+  Navigator.push(
+      context, MaterialPageRoute(builder: (context) => FrequencyProfilePage()));
+}
+
+void _setSensorProfilePage(BuildContext context) {
+  Navigator.push(
+      context, MaterialPageRoute(builder: (context) => SensorProfilePage()));
+}
+
 class MupDeviceCard extends StatelessWidget {
-  const MupDeviceCard({Key key}) : super(key: key);
+  MupDeviceCard({Key key, this.name}) : super(key: key);
 
-  void _deviceInfoPage(BuildContext context) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (contect) => DeviceInfo()));
-  }
+  final String name;
 
-  void _selectFrequencyProfilePage(BuildContext context) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => FrequencyProfilePage()));
-  }
-
-  void _setSensorProfilePage(BuildContext context) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SensorProfilePage()));
-  }
-
+  final List<String> _popupMenuItems = <String>[
+    'Frequency Profile',
+    'Sensor Profile'
+  ];
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Card(
+      elevation: 14,
+      shadowColor: MupColors.shadowColor,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(width: 0.5, color: Colors.blueAccent),
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          Container(
-            height: 150.0,
-            width: 350.0,
-            decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.all(Radius.circular(10.0))),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Text(
-                  "Device 1",
-                  style: TextStyle(color: Colors.white, fontSize: 22),
-                  textAlign: TextAlign.center,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          _deviceInfoPage(context);
-                        },
-                        child: Container(
-                          height: 100.0,
-                          width: 100.0,
-                          color: Colors.grey,
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Device Info",
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          _selectFrequencyProfilePage(context);
-                        },
-                        child: Container(
-                          height: 100.0,
-                          width: 100.0,
-                          color: Colors.grey,
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Frequency Profile",
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          _setSensorProfilePage(context);
-                        },
-                        child: Container(
-                          height: 100.0,
-                          width: 100.0,
-                          color: Colors.grey,
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Sensor Profile",
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
+        children: [
+          ListTile(
+            title: Text(
+              this.name,
+              style: TextStyle(color: Colors.black),
             ),
+            subtitle: Text('Location'),
+            trailing: PopupMenuButton(
+              icon: Icon(
+                Icons.settings,
+                color: Colors.black,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(15.0),
+                ),
+              ),
+              onSelected: (choice) {
+                if (choice == 'Frequency Profile') {
+                  _selectFrequencyProfilePage(context);
+                } else if (choice == 'Sensor Profile') {
+                  _setSensorProfilePage(context);
+                }
+              },
+              itemBuilder: (BuildContext context) {
+                return _popupMenuItems.map((String choice) {
+                  return PopupMenuItem<String>(
+                      value: choice, child: Text(choice));
+                }).toList();
+              },
+            ),
+            dense: false,
+            contentPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+            enableFeedback: true,
+            onTap: () {
+              _deviceInfoPage(context);
+            },
           ),
-
-          // MORE DEVICE WIDGETS CAN BE ADDED HERE
         ],
       ),
     );

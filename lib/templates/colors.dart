@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 class MupColors {
   static final Color mainTheme = Color.fromARGB(255, 77, 108, 250);
+  static final Color cardColor = Color.fromARGB(255, 239, 241, 243);
+  static final Color background = Color.fromARGB(255, 222, 255, 252);
+  static final Color shadowColor = Color(0x802196F3);
 
   //Credit: https://blog.usejournal.com/creating-a-custom-color-swatch-in-flutter-554bcdcb27f3
   static MaterialColor createMaterialColor(Color color) {
