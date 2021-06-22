@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mup_app/backend/flutterfire.dart';
+import 'package:mup_app/templates/colors.dart';
 import 'package:mup_app/testview.dart';
 import 'home_page.dart';
 
@@ -72,14 +73,15 @@ class _LoginState extends State<Login> {
               },
               child: Text(
                 'Forgot Password',
-                style: TextStyle(color: Colors.blue, fontSize: 15),
+                style: TextStyle(fontSize: 15),
               ),
             ),
             Container(
               height: 50,
               width: 250,
               decoration: BoxDecoration(
-                  color: Colors.blue, borderRadius: BorderRadius.circular(20)),
+                  color: MupColors.mainTheme,
+                  borderRadius: BorderRadius.circular(50)),
               child: TextButton(
                 onPressed: () async {
                   bool shouldNavigate =
@@ -108,7 +110,7 @@ class _LoginState extends State<Login> {
               },
               child: Text(
                 'Create Account',
-                style: TextStyle(color: Colors.blue, fontSize: 15),
+                style: TextStyle(fontSize: 15),
               ),
             ),
           ],
