@@ -1,13 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:mup_app/states/CurrentUser.dart';
+import 'package:provider/provider.dart';
 
-class testView extends StatefulWidget {
-  testView({Key key}) : super(key: key);
+class SignUp extends StatefulWidget {
+  SignUp({Key key}) : super(key: key);
 
   @override
-  _testViewState createState() => _testViewState();
+  _SignUpState createState() => _SignUpState();
 }
 
-class _testViewState extends State<testView> {
+class _SignUpState extends State<SignUp> {
+  TextEditingController _NameController =TextEditingController();
+  TextEditingController _emailController =TextEditingController();
+  TextEditingController _passwordController =TextEditingController();
+  TextEditingController _confirmPasswordController =TextEditingController();
+
+  void _signUpUser(String email, String password, BuildContext context, String fullName) async{
+   CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
+   try{
+    String _returnString = await _currentUser.signUpUser(email, password, fullName);
+      if(_returnString == 'success'){
+        Navigator.pop(context);
+      }
+      else {
+         ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                    content: Text(_returnString),
+                    backgroundColor: Colors.red,
+                    ),
+                 );
+      }
+   }
+   catch(e){
+     print(e);
+   }
+
+  }
   @override
    Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +63,7 @@ class _testViewState extends State<testView> {
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               child: TextFormField(
-                
+                controller: _NameController,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Name',
@@ -47,8 +75,8 @@ class _testViewState extends State<testView> {
                   left: 15.0, right: 15.0, top: 15, bottom: 15),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextFormField(
-               
-                obscureText: true,
+                controller: _emailController,
+                obscureText: false,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Email',
@@ -60,7 +88,7 @@ class _testViewState extends State<testView> {
                   left: 15.0, right: 15.0, top: 15, bottom: 15),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextFormField(
-               
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -73,12 +101,12 @@ class _testViewState extends State<testView> {
                   left: 15.0, right: 15.0, top: 15, bottom: 15),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextFormField(
-               
+                controller: _confirmPasswordController,
                 obscureText: true,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Re-enter Password',
-                    hintText: 'Re-enter secure password'),
+                    labelText: 'Confirm Password',
+                    hintText: 'Confirm secure password'),
               ),
             ),
             Container(
@@ -86,9 +114,19 @@ class _testViewState extends State<testView> {
               width: 250,
               decoration: BoxDecoration(
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
-              child: TextButton(
+              child: ElevatedButton(
                 onPressed: () async {
-                 
+                 if(_passwordController.text == _confirmPasswordController.text){
+                   _signUpUser(_emailController.text, _passwordController.text, context,_NameController.text);
+                 }
+                 else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                    content: Text('Passwords did not match'),
+                    backgroundColor: Colors.red,
+                    ),
+                 );
+                 }
                 },
                 child: Text(
                   'Register',

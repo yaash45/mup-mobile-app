@@ -9,17 +9,31 @@ import 'package:mup_app/pages/system_health.dart';
 import 'package:mup_app/pages/device_info.dart';
 import 'package:mup_app/templates/colors.dart';
 import 'package:ff_navigation_bar/ff_navigation_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:mup_app/states/CurrentUser.dart';
+
+enum AuthStatus {
+  unAuthenticated,
+  Authenticated,
+}
+
+AuthStatus _authStatus = AuthStatus.unAuthenticated;
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MUP App',
-      theme: ThemeData(
-        primarySwatch: MupColors.createMaterialColor(MupColors.mainTheme),
+    return ChangeNotifierProvider(
+      create: (context) => CurrentUser(),
+      child: MaterialApp(
+        title: 'MUP App',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        // home: Login(),
+        home: authWidget(),
       ),
-      home: Login(),
     );
   }
 }
@@ -165,7 +179,25 @@ class _DashboardState extends State<Dashboard> {
   }
 
   @override
+  void didChangeDependencies() async {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    print("did change dependencieees");
+    //get the state, check the user, set AuthStatus based on state
+    CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+    String _returnString = await _currentuser.onStartUp();
+
+    if (_returnString == 'success') {
+      setState(() {
+        _authStatus = AuthStatus.Authenticated;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    //CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
+    // print(_currentuser.getCurrentUser.email);
     return Scaffold(
         appBar: MupAppBar(
           'Devices',
@@ -277,4 +309,19 @@ class MupDeviceCard extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget authWidget() {
+  Widget retVal;
+
+  switch (_authStatus) {
+    case AuthStatus.unAuthenticated:
+      retVal = Login();
+      break;
+    case AuthStatus.Authenticated:
+      retVal = MyHomePage(title: "myapp");
+      break;
+    default:
+  }
+  return retVal;
 }
