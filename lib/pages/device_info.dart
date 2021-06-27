@@ -7,11 +7,18 @@ import 'package:flutter_sparkline/flutter_sparkline.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class DeviceInfo extends StatefulWidget {
+  final String deviceImei;
+
+  DeviceInfo({Key key, this.deviceImei}) : super(key: key);
+
   @override
-  _DeviceInfoState createState() => _DeviceInfoState();
+  _DeviceInfoState createState() => _DeviceInfoState(this.deviceImei);
 }
 
 class _DeviceInfoState extends State<DeviceInfo> {
+  final String deviceImei;
+  _DeviceInfoState(this.deviceImei);
+
   GoogleMapController mapController;
 
   static final LatLng _center = LatLng(49.246292, -123.116);
@@ -304,13 +311,12 @@ class _DeviceInfoState extends State<DeviceInfo> {
                                 color: Colors.white, size: 30.0),
                           )),
                       Padding(padding: EdgeInsets.only(bottom: 16.0)),
-                      Text('General',
+                      Text('IMEI',
                           style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w700,
                               fontSize: 24.0)),
-                      Text('Images, Videos',
-                          style: TextStyle(color: Colors.black45)),
+                      Text(deviceImei, style: TextStyle(color: Colors.black45)),
                     ]),
               ),
             ),

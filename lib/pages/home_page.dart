@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mup_app/backend/mup_firebase.dart';
+import 'package:mup_app/models/Device.dart';
 import 'package:mup_app/templates/appbar.dart';
 import 'package:mup_app/pages/login.dart';
 import 'package:mup_app/pages/frequency_profile.dart';
@@ -11,6 +13,7 @@ import 'package:mup_app/templates/colors.dart';
 import 'package:ff_navigation_bar/ff_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:mup_app/states/CurrentUser.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum AuthStatus {
   unAuthenticated,
@@ -103,7 +106,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  final List<String> _deviceNames = <String>[];
+  final List<Device> _devices = <Device>[];
 
   // https://blog.usejournal.com/implementing-swipe-to-delete-in-flutter-a742e041c5dd
   Widget stackBehindDismiss() {
@@ -118,10 +121,22 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _deleteDevice(index) {
-    String deletedDeviceName = _deviceNames[index];
+  void _addDevice(Device device) {
     setState(() {
-      _deviceNames.removeAt(index);
+      if (_devices.isNotEmpty) {
+        _devices.forEach((element) => {
+              if (element.imei != device.imei) {_devices.add(device)}
+            });
+      } else {
+        _devices.add(device);
+      }
+    });
+  }
+
+  void _deleteDevice(index) {
+    String deletedDeviceName = _devices[index].name;
+    setState(() {
+      _devices.removeAt(index);
     });
 
     // Then show a snackbar.
@@ -131,7 +146,7 @@ class _DashboardState extends State<Dashboard> {
 
   List<Widget> _createDeviceList() {
     return new List<Widget>.generate(
-        _deviceNames.length,
+        _devices.length,
         (index) => Dismissible(
               confirmDismiss: (direction) async {
                 return await showDialog(
@@ -140,7 +155,7 @@ class _DashboardState extends State<Dashboard> {
                       return AlertDialog(
                         title: Text('Confirm delete'),
                         content: Text(
-                            "Are you sure you wish to delete ${_deviceNames[index]}?"),
+                            "Are you sure you wish to delete ${_devices[index].name}?"),
                         actions: <Widget>[
                           TextButton(
                               onPressed: () => Navigator.of(context).pop(true),
@@ -155,26 +170,44 @@ class _DashboardState extends State<Dashboard> {
                       );
                     });
               },
-              key: Key(_deviceNames[index]),
+              key: Key(_devices[index].name),
               background: stackBehindDismiss(),
               onDismissed: (direction) {
                 _deleteDevice(index);
               },
-              child: MupDeviceCard(name: _deviceNames[index]),
+              child: MupDeviceCard(device: _devices[index]),
             ));
   }
 
-  Future<void> _refreshDeviceList() async {
-    //TODO: Replace this with logic to obtain data from database
-    await Future.delayed(Duration(milliseconds: 500));
-    setState(() {
-      _deviceNames.add("test-${_deviceNames.length}");
+  void _fetchDeviceList() {
+    var _currentUser = Provider.of<CurrentUser>(context, listen: false);
+    databaseReference
+        .collection('users')
+        .where('email', isEqualTo: "${_currentUser.email}")
+        .get()
+        .then((QuerySnapshot snapshot) {
+      snapshot.docs.forEach((element) {
+        List deviceList = element['Devices'];
+        deviceList.forEach((device) {
+          device.get().then((DocumentSnapshot deviceSnapshot) {
+            Map<String, dynamic> deviceData = deviceSnapshot.data();
+            _addDevice(
+                Device(name: deviceData['name'], imei: deviceSnapshot.id));
+          });
+        });
+      });
     });
+  }
+
+  Future<void> _refreshDeviceList() async {
+    _fetchDeviceList();
+    _createDeviceList();
   }
 
   @override
   void initState() {
     super.initState();
+    _fetchDeviceList();
     _createDeviceList();
   }
 
@@ -233,9 +266,13 @@ class _DashboardState extends State<Dashboard> {
   }
 }
 
-void _deviceInfoPage(BuildContext context) {
+void _deviceInfoPage(BuildContext context, String imei) {
   Navigator.push(
-      context, MaterialPageRoute(builder: (contect) => DeviceInfo()));
+      context,
+      MaterialPageRoute(
+          builder: (contect) => DeviceInfo(
+                deviceImei: imei,
+              )));
 }
 
 void _selectFrequencyProfilePage(BuildContext context) {
@@ -249,9 +286,9 @@ void _setSensorProfilePage(BuildContext context) {
 }
 
 class MupDeviceCard extends StatelessWidget {
-  MupDeviceCard({Key key, this.name}) : super(key: key);
+  MupDeviceCard({Key key, this.device}) : super(key: key);
 
-  final String name;
+  final Device device;
 
   final List<String> _popupMenuItems = <String>[
     'Frequency Profile',
@@ -270,7 +307,7 @@ class MupDeviceCard extends StatelessWidget {
         children: [
           ListTile(
             title: Text(
-              this.name,
+              this.device.name,
               style: TextStyle(color: Colors.black),
             ),
             subtitle: Text('Location'),
@@ -302,7 +339,7 @@ class MupDeviceCard extends StatelessWidget {
             contentPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
             enableFeedback: true,
             onTap: () {
-              _deviceInfoPage(context);
+              _deviceInfoPage(context, device.imei);
             },
           ),
         ],
