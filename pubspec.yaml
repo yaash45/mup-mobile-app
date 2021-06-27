@@ -40,6 +40,8 @@ dependencies:
   ff_navigation_bar: ^0.1.4
   provider: ^4.0.2
   google_sign_in: ^5.0.4
+  http: ^0.13.3
+  intl: ^0.17.0
   
 
 dev_dependencies:

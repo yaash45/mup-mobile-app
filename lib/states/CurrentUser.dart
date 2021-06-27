@@ -46,12 +46,12 @@ FirebaseAuth.instance
     _currentUser.email = _auth.currentUser.email;
     print(_currentUser.uid);
     print(_currentUser.email);
-    retVal = 'success';
+    retVal = 'success';git 
     print(retVal); */
     _currentUser = await OurDatabase().getUserInfo(_auth.currentUser.uid);
     if (_currentUser != null) {
-      print(_currentUser.uid);
-      print(_currentUser.email);
+      print("UID is " + _currentUser.uid);
+      print("email is " + _currentUser.email);
       retVal = 'success';
     }
 

@@ -23,7 +23,7 @@ class MupAppBar extends StatelessWidget with PreferredSizeWidget {
       ),
       leading: this.leadingBackButton == true
           ? IconButton(
-              icon: Icon(Icons.arrow_back_ios_new_rounded),
+              icon: Icon(Icons.arrow_back_ios_rounded),
               onPressed: () {
                 Navigator.pop(context);
               },

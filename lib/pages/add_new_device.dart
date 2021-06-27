@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mup_app/backend/Octave.dart';
 import 'package:mup_app/templates/appbar.dart';
 import 'package:mup_app/templates/colors.dart';
 import '../backend/mup_firebase.dart';
@@ -35,7 +40,8 @@ class _AddNewDevicePageState extends State {
     );
   }
 
-  void _addDevice() {
+  void _addDevice() async {
+    /*
     setState(() {
       if (_imei == '') {
         _showToast(context, "Please enter IMEI number for your device");
@@ -46,7 +52,7 @@ class _AddNewDevicePageState extends State {
           // TODO: Get device count for account and set name accordingly
           _name = 'mangoh-1';
         }
-
+        /*
         Map<String, dynamic> deviceData = {
           "user": "test",
           "imei": _imei,
@@ -63,8 +69,29 @@ class _AddNewDevicePageState extends State {
               "Added device with IMEI = $_imei, Serial = $_serial, Name = $_name");
           Navigator.pop(context);
         });
-      }
-    });
+      } */
+      
+    }
+    ); */
+    //var createdDeviceResponse = await Octave().CreateDevice();
+    //print(createdDeviceResponse.body);
+     
+     var response =  await Octave().ReadDevice();
+     Map<String, dynamic> data = jsonDecode(response.body);
+     
+     final databaseReference = FirebaseFirestore.instance;
+     databaseReference.collection("devices").doc("352653090202201").set(data);
+    DocumentReference reference = databaseReference.collection('devices').doc('352653090202201');
+    var DevicesList = [reference];
+    Map<String, List> userData = {
+    'Devices': DevicesList
+     };
+
+    databaseReference.collection('users').doc('HEbxCQEvNHYSmwp9orEW2ViWWA13').update(userData);
+
+    print("yes");
+    
+
   }
 
   void _setImei(imei) {
@@ -133,7 +160,7 @@ class _AddNewDevicePageState extends State {
                 ),
                 TextField(
                   decoration: InputDecoration(
-                    labelText: "Device name (optional)",
+                    labelText: "Device name",
                     hintText: "This is your device nickname",
                     hintStyle: TextStyle(color: Colors.grey[500]),
                     border: OutlineInputBorder(

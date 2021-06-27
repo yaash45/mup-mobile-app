@@ -103,7 +103,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  final List<String> _deviceNames = <String>[];
+  final List<String> _deviceNames = <String>["Jarvin"];
 
   // https://blog.usejournal.com/implementing-swipe-to-delete-in-flutter-a742e041c5dd
   Widget stackBehindDismiss() {
