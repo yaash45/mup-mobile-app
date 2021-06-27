@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mup_app/backend/flutterfire.dart';
 import 'package:mup_app/templates/colors.dart';
-import 'package:mup_app/SignUp.dart';
+import 'package:mup_app/pages/sign_up.dart';
 import 'package:mup_app/states/CurrentUser.dart';
 import 'package:provider/provider.dart';
 import 'home_page.dart';

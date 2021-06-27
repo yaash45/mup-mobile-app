@@ -52,7 +52,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
-  final List<Widget> _children = [Dashboard(), SystemHealthPage(), MyAccount()];
+  final List<Widget> _children = [Dashboard(), MyAccount()];
 
   void onTappedBar(int index) {
     setState(() {
@@ -82,11 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
           FFNavigationBarItem(
             iconData: Icons.list_alt_rounded,
             label: 'Devices',
-            animationDuration: Duration(milliseconds: 1500),
-          ),
-          FFNavigationBarItem(
-            iconData: Icons.grading_sharp,
-            label: 'System Health',
             animationDuration: Duration(milliseconds: 1500),
           ),
           FFNavigationBarItem(
