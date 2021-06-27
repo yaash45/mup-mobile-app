@@ -7,6 +7,8 @@ import 'package:mup_app/backend/Octave.dart';
 import 'package:mup_app/templates/appbar.dart';
 import 'package:mup_app/templates/colors.dart';
 import '../backend/mup_firebase.dart';
+import 'package:provider/provider.dart';
+import 'package:mup_app/states/CurrentUser.dart';
 
 class AddNewDevicePage extends StatefulWidget {
   @override
@@ -54,7 +56,7 @@ class _AddNewDevicePageState extends State {
         }
         /*
         Map<String, dynamic> deviceData = {
-          "user": "test",
+          "user": user,
           "imei": _imei,
           "serial": _serial,
           "name": _name,
@@ -108,88 +110,94 @@ class _AddNewDevicePageState extends State {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MupAppBar(
-        'Add new device',
-        leadingBackButton: true,
-      ),
-      body: Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(10),
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "IMEI",
-                    hintText: "Please check your device for IMEI",
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    border: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.blue, width: 2.0),
-                      borderRadius: BorderRadius.circular(12.0),
+    return Consumer<CurrentUser>(builder: (context, user, child) {
+      var _currentUser = user.getCurrentUser;
+
+      return Scaffold(
+        appBar: MupAppBar(
+          "Add new device",
+          leadingBackButton: true,
+        ),
+        body: Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: "IMEI",
+                      hintText: "Please check your device for IMEI",
+                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                     ),
+                    keyboardType: TextInputType.number,
+                    controller: imeiHolder,
+                    onChanged: _setImei,
                   ),
-                  keyboardType: TextInputType.number,
-                  controller: imeiHolder,
-                  onChanged: _setImei,
-                ),
-                Padding(
-                  padding: EdgeInsets.all(10),
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "Serial Number",
-                    hintText: "Please check your device for Serial No.",
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    border: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.blue, width: 2.0),
-                      borderRadius: BorderRadius.circular(12.0),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: "Serial Number",
+                      hintText: "Please check your device for Serial No.",
+                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                     ),
+                    keyboardType: TextInputType.number,
+                    controller: serialHolder,
+                    onChanged: _setSerial,
                   ),
-                  keyboardType: TextInputType.number,
-                  controller: serialHolder,
-                  onChanged: _setSerial,
-                ),
-                Padding(
-                  padding: EdgeInsets.all(10),
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "Device name",
-                    hintText: "This is your device nickname",
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    border: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.blue, width: 2.0),
-                      borderRadius: BorderRadius.circular(12.0),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: "Device name (optional)",
+                      hintText: "This is your device nickname",
+                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                     ),
+                    keyboardType: TextInputType.name,
+                    controller: nameHolder,
+                    onChanged: _setName,
                   ),
-                  keyboardType: TextInputType.name,
-                  controller: nameHolder,
-                  onChanged: _setName,
-                ),
-                Padding(
-                  padding: EdgeInsets.all(10),
-                ),
-                SizedBox(
-                  child: ElevatedButton(
-                    onPressed: _addDevice,
-                    child: Text("Add"),
-                    style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(MupColors.mainTheme)),
+                  Padding(
+                    padding: EdgeInsets.all(10),
                   ),
-                  height: 50,
-                  width: double.infinity,
-                ),
-              ],
-            ),
-          )),
-    );
+                  SizedBox(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _addDevice();
+                      },
+                      child: Text("Add"),
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(MupColors.mainTheme)),
+                    ),
+                    height: 50,
+                    width: double.infinity,
+                  ),
+                ],
+              ),
+            )),
+      );
+    });
   }
 }
