@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mup_app/templates/appbar.dart';
 import 'package:mup_app/backend/mup_firebase.dart';
+import 'package:mup_app/states/CurrentUser.dart';
+import 'package:provider/provider.dart';
 
 class SystemHealthPage extends StatefulWidget {
   @override
@@ -42,10 +45,7 @@ class _SystemHealthPageState extends State<SystemHealthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('System Health'),
-        leading: Container(),
-      ),
+      appBar: MupAppBar('System Health'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

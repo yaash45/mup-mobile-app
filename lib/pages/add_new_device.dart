@@ -1,5 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mup_app/backend/Octave.dart';
+import 'package:mup_app/templates/appbar.dart';
+import 'package:mup_app/templates/colors.dart';
 import '../backend/mup_firebase.dart';
+import 'package:provider/provider.dart';
+import 'package:mup_app/states/CurrentUser.dart';
 
 class AddNewDevicePage extends StatefulWidget {
   @override
@@ -33,7 +42,8 @@ class _AddNewDevicePageState extends State {
     );
   }
 
-  void _addDevice() {
+  void _addDevice() async {
+    /*
     setState(() {
       if (_imei == '') {
         _showToast(context, "Please enter IMEI number for your device");
@@ -44,9 +54,9 @@ class _AddNewDevicePageState extends State {
           // TODO: Get device count for account and set name accordingly
           _name = 'mangoh-1';
         }
-
+        /*
         Map<String, dynamic> deviceData = {
-          "user": "test",
+          "user": user,
           "imei": _imei,
           "serial": _serial,
           "name": _name,
@@ -61,8 +71,29 @@ class _AddNewDevicePageState extends State {
               "Added device with IMEI = $_imei, Serial = $_serial, Name = $_name");
           Navigator.pop(context);
         });
-      }
-    });
+      } */
+      
+    }
+    ); */
+    //var createdDeviceResponse = await Octave().CreateDevice();
+    //print(createdDeviceResponse.body);
+     
+     var response =  await Octave().ReadDevice();
+     Map<String, dynamic> data = jsonDecode(response.body);
+     
+     final databaseReference = FirebaseFirestore.instance;
+     databaseReference.collection("devices").doc("352653090202201").set(data);
+    DocumentReference reference = databaseReference.collection('devices').doc('352653090202201');
+    var DevicesList = [reference];
+    Map<String, List> userData = {
+    'Devices': DevicesList
+     };
+
+    databaseReference.collection('users').doc('HEbxCQEvNHYSmwp9orEW2ViWWA13').update(userData);
+
+    print("yes");
+    
+
   }
 
   void _setImei(imei) {
@@ -79,89 +110,94 @@ class _AddNewDevicePageState extends State {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Add new device'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+    return Consumer<CurrentUser>(builder: (context, user, child) {
+      var _currentUser = user.getCurrentUser;
+
+      return Scaffold(
+        appBar: MupAppBar(
+          "Add new device",
+          leadingBackButton: true,
         ),
-      ),
-      body: Padding(
-          padding: EdgeInsets.all(10.0),
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Spacer(
-                  flex: 1,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "IMEI",
-                    hintText: "Please check your device for IMEI",
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    border: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.blue, width: 2.0),
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
+        body: Padding(
+            padding: EdgeInsets.all(10.0),
+            child: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10),
                   ),
-                  keyboardType: TextInputType.number,
-                  controller: imeiHolder,
-                  onChanged: _setImei,
-                ),
-                Spacer(
-                  flex: 1,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "Serial Number",
-                    hintText: "Please check your device for Serial No.",
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    border: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.blue, width: 2.0),
-                      borderRadius: BorderRadius.circular(12.0),
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: "IMEI",
+                      hintText: "Please check your device for IMEI",
+                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                     ),
+                    keyboardType: TextInputType.number,
+                    controller: imeiHolder,
+                    onChanged: _setImei,
                   ),
-                  keyboardType: TextInputType.number,
-                  controller: serialHolder,
-                  onChanged: _setSerial,
-                ),
-                Spacer(
-                  flex: 1,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "Device name (optional)",
-                    hintText: "This is your device nickname",
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    border: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.blue, width: 2.0),
-                      borderRadius: BorderRadius.circular(12.0),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: "Serial Number",
+                      hintText: "Please check your device for Serial No.",
+                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                     ),
+                    keyboardType: TextInputType.number,
+                    controller: serialHolder,
+                    onChanged: _setSerial,
                   ),
-                  keyboardType: TextInputType.name,
-                  controller: nameHolder,
-                  onChanged: _setName,
-                ),
-                Spacer(
-                  flex: 10,
-                ),
-                ElevatedButton(
-                  onPressed: _addDevice,
-                  child: Text("Add"),
-                ),
-                Spacer(
-                  flex: 2,
-                ),
-              ],
-            ),
-          )),
-    );
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: "Device name (optional)",
+                      hintText: "This is your device nickname",
+                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2.0),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                    ),
+                    keyboardType: TextInputType.name,
+                    controller: nameHolder,
+                    onChanged: _setName,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                  ),
+                  SizedBox(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _addDevice();
+                      },
+                      child: Text("Add"),
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(MupColors.mainTheme)),
+                    ),
+                    height: 50,
+                    width: double.infinity,
+                  ),
+                ],
+              ),
+            )),
+      );
+    });
   }
 }

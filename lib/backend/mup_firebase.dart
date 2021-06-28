@@ -11,4 +11,5 @@ class MupFirestore {
 // The get function returns a future that needs to be resolved by the caller
   Future<QuerySnapshot> getObjectByCollection(String collectionName) =>
       databaseReference.collection(collectionName).get();
+
 }
