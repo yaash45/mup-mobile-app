@@ -181,15 +181,21 @@ class _DashboardState extends State<Dashboard> {
         .where('email', isEqualTo: "${_currentUser.email}")
         .get()
         .then((QuerySnapshot snapshot) {
-      snapshot.docs.forEach((element) {
-        List deviceList = element['Devices'];
-        deviceList.forEach((device) {
-          device.get().then((DocumentSnapshot deviceSnapshot) {
-            Map<String, dynamic> deviceData = deviceSnapshot.data();
-            _addDevice(
-                Device(name: deviceData['name'], imei: deviceSnapshot.id));
-          });
-        });
+      snapshot.docs.forEach((QueryDocumentSnapshot<Object> element) {
+        try {
+          var deviceList = element.get('Devices');
+          if (deviceList != null) {
+            deviceList.forEach((device) {
+              device.get().then((DocumentSnapshot deviceSnapshot) {
+                Map<String, dynamic> deviceData = deviceSnapshot.data();
+                _addDevice(Device(
+                    name: deviceData['body']['name'], imei: deviceSnapshot.id));
+              });
+            });
+          }
+        } catch (StateError) {
+          print("No devices found for user");
+        }
       });
     });
   }
@@ -305,7 +311,6 @@ class MupDeviceCard extends StatelessWidget {
               this.device.name,
               style: TextStyle(color: Colors.black),
             ),
-            subtitle: Text('Location'),
             trailing: PopupMenuButton(
               icon: Icon(
                 Icons.settings,
