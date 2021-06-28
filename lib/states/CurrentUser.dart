@@ -5,6 +5,7 @@ import 'package:mup_app/backend/database.dart';
 import 'package:mup_app/models/Device.dart';
 import 'package:mup_app/models/UserModel.dart';
 import 'package:mup_app/pages/root.dart';
+import 'package:intl/intl.dart';
 
 class CurrentUser extends ChangeNotifier {
   UserModel _currentUser = UserModel();
@@ -14,6 +15,13 @@ String _email; */
 
   UserModel get getCurrentUser => _currentUser;
   String get email => _currentUser.email;
+  String get fullName => _currentUser.fullName;
+  String get accountCreated {
+    DateTime accountCreatedDate = _currentUser.accountCreated.toDate();
+    return new DateFormat("yyyy-MMMM-dd, H:m")
+        .format(accountCreatedDate)
+        .toString();
+  }
 
   FirebaseAuth _auth = FirebaseAuth.instance;
 
