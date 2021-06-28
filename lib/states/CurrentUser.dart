@@ -18,7 +18,7 @@ String _email; */
   String get fullName => _currentUser.fullName;
   String get accountCreated {
     DateTime accountCreatedDate = _currentUser.accountCreated.toDate();
-    return new DateFormat("yyyy-MMMM-dd, H:m")
+    return new DateFormat("yyyy-MMMM-dd, HH:mm")
         .format(accountCreatedDate)
         .toString();
   }
