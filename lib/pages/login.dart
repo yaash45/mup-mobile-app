@@ -64,36 +64,40 @@ class _LoginState extends State<Login> {
 
   Widget google_sign_up2(context) {
     return InkWell(
-      child: Container(
-          width: MediaQuery.of(context).size.width / 2,
-          height: MediaQuery.of(context).size.height / 18,
-          margin: EdgeInsets.only(top: 20),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.lightBlue[400]),
-          child: Center(
-              child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Container(
-                height: 30.0,
-                width: 30.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage('assets/google_logo.png'),
-                      fit: BoxFit.cover),
-                  shape: BoxShape.circle,
+      child: Padding(
+        padding:
+            const EdgeInsets.only(left: 15.0, right: 15.0, top: 0, bottom: 0),
+        child: Container(
+            width: double.infinity,
+            height: 50,
+            margin: EdgeInsets.only(top: 20),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: MupColors.appSwatch.shade100),
+            child: Center(
+                child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  height: 30.0,
+                  width: 30.0,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('assets/google_logo.png'),
+                        fit: BoxFit.cover),
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              ),
-              Text(
-                'Sign in with Google',
-                style: TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
-            ],
-          ))),
+                Padding(
+                  padding: EdgeInsets.all(5),
+                ),
+                Text(
+                  'Sign in with Google',
+                  style: TextStyle(fontSize: 18.0, color: Colors.white),
+                ),
+              ],
+            ))),
+      ),
       onTap: () async {
         _loginUserWithGoogle(context);
       },
@@ -155,42 +159,44 @@ class _LoginState extends State<Login> {
                     hintText: 'Enter secure password'),
               ),
             ),
-            TextButton(
-              onPressed: () {
-                //TODO FORGOT PASSWORD SCREEN GOES HERE
-              },
-              child: Text(
-                'Forgot Password',
-                style: TextStyle(fontSize: 15),
-              ),
+            Padding(
+              padding: EdgeInsets.all(6),
             ),
-            Container(
-              height: 50,
-              width: 250,
-              decoration: BoxDecoration(
-                  color: MupColors.mainTheme,
-                  borderRadius: BorderRadius.circular(50)),
-              child: TextButton(
-                onPressed: () async {
-                  _loginUser(_emailField.text, _passwordField.text, context);
-                },
-                child: Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 15.0, right: 15.0, top: 10, bottom: 0),
+              child: Container(
+                height: 50,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    color: MupColors.mainTheme,
+                    borderRadius: BorderRadius.circular(50)),
+                child: TextButton(
+                  onPressed: () async {
+                    _loginUser(_emailField.text, _passwordField.text, context);
+                  },
+                  child: Text(
+                    'Login',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
                 ),
               ),
             ),
             google_sign_up2(context),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignUp()),
-                );
-              },
-              child: Text(
-                'Create Account',
-                style: TextStyle(fontSize: 15),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 15.0, right: 15.0, top: 10, bottom: 0),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUp()),
+                  );
+                },
+                child: Text(
+                  'Create Account',
+                  style: TextStyle(fontSize: 15),
+                ),
               ),
             ),
           ],
