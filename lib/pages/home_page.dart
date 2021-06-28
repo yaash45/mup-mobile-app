@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'MUP App',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primarySwatch: MupColors.appSwatch,
         ),
         // home: Login(),
         home: authWidget(),
