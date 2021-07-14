@@ -26,23 +26,13 @@ app.post("/provision", (req, res, err) => {
   var fsn = req.body.fsn;
   var name = req.body.name;
 
-  console.log(
-    "process.env.OCTAVE_AUTH_TOKEN :>> ",
-    process.env.OCTAVE_AUTH_TOKEN
-  );
-
-  console.log(
-    "process.env.OCTAVE_AUTH_USER :>> ",
-    process.env.OCTAVE_AUTH_USER
-  );
-
   var options = {
     hostname: "octave-api.sierrawireless.io",
     path: "/v5.0/capstone_uop2021/device/provision",
     method: "POST",
     headers: {
-      "X-Auth-Token": process.env.OCTAVE_AUTH_TOKEN,
-      "X-Auth-User": process.env.OCTAVE_AUTH_USER,
+      "X-Auth-Token": functions.config().octave.auth_token,
+      "X-Auth-User": functions.config().octave.auth_user,
     },
   };
 
@@ -92,8 +82,8 @@ app.get("/:deviceName", (req, res, err) => {
     path: `/v5.0/capstone_uop2021/device/${req.params.deviceName}`,
     method: "GET",
     headers: {
-      "X-Auth-Token": process.env.OCTAVE_AUTH_TOKEN,
-      "X-Auth-User": process.env.OCTAVE_AUTH_USER,
+      "X-Auth-Token": functions.config().octave.auth_token,
+      "X-Auth-User": functions.config().octave.auth_user,
     },
   };
   https
