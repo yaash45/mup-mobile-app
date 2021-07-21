@@ -101,7 +101,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  final List<Device> _devices = <Device>[];
+  final List<DeviceCard> _devices = <DeviceCard>[];
 
   // https://blog.usejournal.com/implementing-swipe-to-delete-in-flutter-a742e041c5dd
   Widget stackBehindDismiss() {
@@ -116,7 +116,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _addDevice(Device device) {
+  void _addDevice(DeviceCard device) {
     setState(() {
       if (_devices.isNotEmpty) {
         _devices.forEach((element) => {
@@ -188,7 +188,7 @@ class _DashboardState extends State<Dashboard> {
             deviceList.forEach((device) {
               device.get().then((DocumentSnapshot deviceSnapshot) {
                 Map<String, dynamic> deviceData = deviceSnapshot.data();
-                _addDevice(Device(
+                _addDevice(DeviceCard(
                     name: deviceData['body']['name'], imei: deviceSnapshot.id));
               });
             });
@@ -289,7 +289,7 @@ void _setSensorProfilePage(BuildContext context) {
 class MupDeviceCard extends StatelessWidget {
   MupDeviceCard({Key key, this.device}) : super(key: key);
 
-  final Device device;
+  final DeviceCard device;
 
   final List<String> _popupMenuItems = <String>[
     'Frequency Profile',
