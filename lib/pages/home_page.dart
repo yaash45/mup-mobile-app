@@ -116,11 +116,19 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  void _replaceDevice(DeviceCard original, DeviceCard latest) {
+    _devices.remove(original);
+    _devices.add(latest);
+  }
+
   void _addDevice(DeviceCard device) {
     setState(() {
       if (_devices.isNotEmpty) {
         _devices.forEach((element) => {
-              if (element.imei != device.imei) {_devices.add(device)}
+              if (element.imei != device.imei)
+                {_devices.add(device)}
+              else
+                {_replaceDevice(element, device)}
             });
       } else {
         _devices.add(device);
