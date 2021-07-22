@@ -11,6 +11,6 @@ class DeviceCard {
   DeviceCard({
     this.imei,
     this.name,
-    this.status,
+    this.status = DeviceStatus.PENDING,
   });
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mup_app/backend/mup_firebase.dart';
 import 'package:mup_app/models/Device.dart';
@@ -7,7 +8,6 @@ import 'package:mup_app/pages/frequency_profile.dart';
 import 'package:mup_app/pages/my_account.dart';
 import 'package:mup_app/pages/add_new_device.dart';
 import 'package:mup_app/pages/sensor_profile.dart';
-import 'package:mup_app/pages/system_health.dart';
 import 'package:mup_app/pages/device_info.dart';
 import 'package:mup_app/templates/colors.dart';
 import 'package:ff_navigation_bar/ff_navigation_bar.dart';
@@ -295,6 +295,20 @@ class MupDeviceCard extends StatelessWidget {
     'Frequency Profile',
     'Sensor Profile'
   ];
+
+  void _showDeviceNotReadyDialog(BuildContext context) {
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      showDialog(
+        context: context,
+        builder: (_) => new CupertinoAlertDialog(
+          title: Text('Pending Device Activation'),
+          content: Text(
+              'This can take upto 20 minutes. Please refresh in sometime to check if your device is ready. Thank you for your patience.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -311,6 +325,22 @@ class MupDeviceCard extends StatelessWidget {
               this.device.name,
               style: TextStyle(color: Colors.black),
             ),
+            subtitle: Padding(
+                padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                child: Row(
+                  children: [
+                    Text('Status: '),
+                    this.device.status == DeviceStatus.PENDING
+                        ? Text(
+                            'PENDING',
+                            style: TextStyle(color: Colors.red),
+                          )
+                        : Text(
+                            'READY',
+                            style: TextStyle(color: Colors.green),
+                          )
+                  ],
+                )),
             trailing: PopupMenuButton(
               icon: Icon(
                 Icons.settings,
@@ -339,7 +369,11 @@ class MupDeviceCard extends StatelessWidget {
             contentPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
             enableFeedback: true,
             onTap: () {
-              _deviceInfoPage(context, device.imei);
+              if (device.status == DeviceStatus.READY) {
+                _deviceInfoPage(context, device.imei);
+              } else {
+                _showDeviceNotReadyDialog(context);
+              }
             },
           ),
         ],
