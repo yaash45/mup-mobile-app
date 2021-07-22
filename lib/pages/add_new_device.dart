@@ -77,23 +77,23 @@ class _AddNewDevicePageState extends State {
     ); */
     //var createdDeviceResponse = await Octave().CreateDevice();
     //print(createdDeviceResponse.body);
-     
-     var response =  await Octave().ReadDevice();
-     Map<String, dynamic> data = jsonDecode(response.body);
-     
-     final databaseReference = FirebaseFirestore.instance;
-     databaseReference.collection("devices").doc("352653090202201").set(data);
-    DocumentReference reference = databaseReference.collection('devices').doc('352653090202201');
-    var DevicesList = [reference];
-    Map<String, List> userData = {
-    'Devices': DevicesList
-     };
 
-    databaseReference.collection('users').doc('HEbxCQEvNHYSmwp9orEW2ViWWA13').update(userData);
+    var response = await Octave.getDevice('raad023');
+    Map<String, dynamic> data = jsonDecode(response.body);
+
+    final databaseReference = FirebaseFirestore.instance;
+    databaseReference.collection("devices").doc("352653090202201").set(data);
+    DocumentReference reference =
+        databaseReference.collection('devices').doc('352653090202201');
+    var DevicesList = [reference];
+    Map<String, List> userData = {'Devices': DevicesList};
+
+    databaseReference
+        .collection('users')
+        .doc('HEbxCQEvNHYSmwp9orEW2ViWWA13')
+        .update(userData);
 
     print("yes");
-    
-
   }
 
   void _setImei(imei) {

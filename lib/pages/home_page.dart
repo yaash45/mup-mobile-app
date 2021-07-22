@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mup_app/backend/Octave.dart';
 import 'package:mup_app/backend/mup_firebase.dart';
 import 'package:mup_app/models/Device.dart';
 import 'package:mup_app/templates/appbar.dart';
@@ -14,6 +17,7 @@ import 'package:ff_navigation_bar/ff_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:mup_app/states/CurrentUser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart';
 
 enum AuthStatus {
   unAuthenticated,
@@ -182,7 +186,14 @@ class _DashboardState extends State<Dashboard> {
             ));
   }
 
-  void _fetchDeviceList() {
+  DeviceStatus _deviceStatusFromOctaveResponse(
+      Map<String, dynamic> deviceData) {
+    return jsonEncode(deviceData['body']['report']) == jsonEncode({})
+        ? DeviceStatus.PENDING
+        : DeviceStatus.READY;
+  }
+
+  void _fetchDeviceListFromFirebase() {
     var _currentUser = Provider.of<CurrentUser>(context, listen: false);
     databaseReference
         .collection('users')
@@ -196,8 +207,13 @@ class _DashboardState extends State<Dashboard> {
             deviceList.forEach((device) {
               device.get().then((DocumentSnapshot deviceSnapshot) {
                 Map<String, dynamic> deviceData = deviceSnapshot.data();
-                _addDevice(DeviceCard(
-                    name: deviceData['body']['name'], imei: deviceSnapshot.id));
+                _addDevice(
+                  DeviceCard(
+                    name: deviceData['body']['name'],
+                    imei: deviceSnapshot.id,
+                    status: _deviceStatusFromOctaveResponse(deviceData),
+                  ),
+                );
               });
             });
           }
@@ -208,15 +224,39 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
+  void _fetchDeviceInfoFromOctave() async {
+    List<DeviceCard> recentlyFetchedFromCloudFunction = [];
+    for (var d in _devices) {
+      Response response = await Octave.getDevice(d.name);
+      Map<String, dynamic> deviceData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        recentlyFetchedFromCloudFunction.add(
+          DeviceCard(
+            imei: deviceData['body']['hardware']['imei'],
+            name: deviceData['body']['name'],
+            status: _deviceStatusFromOctaveResponse(deviceData),
+          ),
+        );
+      }
+    }
+
+    recentlyFetchedFromCloudFunction.forEach((element) {
+      print(element.name);
+      _addDevice(element);
+    });
+  }
+
   Future<void> _refreshDeviceList() async {
-    _fetchDeviceList();
+    _fetchDeviceListFromFirebase();
+    _fetchDeviceInfoFromOctave();
     _createDeviceList();
   }
 
   @override
   void initState() {
     super.initState();
-    _fetchDeviceList();
+    _fetchDeviceListFromFirebase();
+    _fetchDeviceInfoFromOctave();
     _createDeviceList();
   }
 
@@ -309,6 +349,15 @@ class MupDeviceCard extends StatelessWidget {
       showDialog(
         context: context,
         builder: (_) => new CupertinoAlertDialog(
+          title: Text('Pending Device Activation'),
+          content: Text(
+              'This can take upto 20 minutes. Please refresh in sometime to check if your device is ready. Thank you for your patience.'),
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (_) => new AlertDialog(
           title: Text('Pending Device Activation'),
           content: Text(
               'This can take upto 20 minutes. Please refresh in sometime to check if your device is ready. Thank you for your patience.'),
