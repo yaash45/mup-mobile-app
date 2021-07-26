@@ -342,7 +342,16 @@ class _DashboardState extends State<Dashboard> {
               ),
             )
           : Center(
-              child: CircularProgressIndicator(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                  ),
+                  Text('Checking activation status...')
+                ],
+              ),
             ),
     );
   }
