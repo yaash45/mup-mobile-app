@@ -106,6 +106,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final List<DeviceCard> _devices = <DeviceCard>[];
+  bool _loaded;
 
   // https://blog.usejournal.com/implementing-swipe-to-delete-in-flutter-a742e041c5dd
   Widget stackBehindDismiss() {
@@ -141,6 +142,18 @@ class _DashboardState extends State<Dashboard> {
     // Then show a snackbar.
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(deletedDeviceName + " deleted")));
+  }
+
+  void _beginLoad() {
+    setState(() {
+      _loaded = false;
+    });
+  }
+
+  void _completeLoad() {
+    setState(() {
+      _loaded = true;
+    });
   }
 
   List<Widget> _createDeviceList() {
@@ -221,6 +234,8 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> _fetchDeviceInfoFromOctave() async {
     print('mapping device list to device names...');
+    _beginLoad();
+    print('loaded = ' + _loaded.toString());
     List<String> _deviceNames =
         _devices.map((deviceCard) => deviceCard.name).toList();
     print('mapped list = ' + _deviceNames.toString());
@@ -247,6 +262,8 @@ class _DashboardState extends State<Dashboard> {
       }
       print('fetched device list =  ' + _devices.toString());
     }
+    _completeLoad();
+    print('completed load = ' + _loaded.toString());
   }
 
   Future<void> _refreshDeviceList() async {
@@ -257,6 +274,7 @@ class _DashboardState extends State<Dashboard> {
   void initState() {
     super.initState();
     _fetchDeviceListFromFirebase();
+    _completeLoad();
   }
 
   @override
@@ -280,37 +298,40 @@ class _DashboardState extends State<Dashboard> {
     //CurrentUser _currentuser = Provider.of<CurrentUser>(context, listen: false);
     // print(_currentuser.getCurrentUser.email);
     return Scaffold(
-        appBar: MupAppBar(
-          'Devices',
-          actions: [
-            IconButton(
-              splashRadius: 28,
-              alignment: Alignment.center,
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddNewDevicePage()));
-              },
-              icon: Icon(
-                Icons.add,
-                color: Colors.white,
-              ),
-              iconSize: 28,
+      appBar: MupAppBar(
+        'Devices',
+        actions: [
+          IconButton(
+            splashRadius: 28,
+            alignment: Alignment.center,
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => AddNewDevicePage()));
+            },
+            icon: Icon(
+              Icons.add,
+              color: Colors.white,
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
-            ),
-          ],
-        ),
-        body: RefreshIndicator(
-          onRefresh: _refreshDeviceList,
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
-            scrollDirection: Axis.vertical,
-            children: _createDeviceList(),
+            iconSize: 28,
           ),
-        ));
+          Padding(
+            padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
+          ),
+        ],
+      ),
+      body: _loaded == true
+          ? RefreshIndicator(
+              onRefresh: _refreshDeviceList,
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+                scrollDirection: Axis.vertical,
+                children: _createDeviceList(),
+              ),
+            )
+          : Center(
+              child: CircularProgressIndicator(),
+            ),
+    );
   }
 }
 
