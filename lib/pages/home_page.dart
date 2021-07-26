@@ -120,23 +120,15 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _replaceDevice(DeviceCard original, DeviceCard latest) {
-    _devices.remove(original);
-    _devices.add(latest);
+  void _clearDeviceList() {
+    setState(() {
+      _devices.clear();
+    });
   }
 
   void _addDevice(DeviceCard device) {
     setState(() {
-      if (_devices.isNotEmpty) {
-        _devices.forEach((element) => {
-              if (element.imei != device.imei)
-                {_devices.add(device)}
-              else
-                {_replaceDevice(element, device)}
-            });
-      } else {
-        _devices.add(device);
-      }
+      _devices.add(device);
     });
   }
 
@@ -193,8 +185,11 @@ class _DashboardState extends State<Dashboard> {
         : DeviceStatus.READY;
   }
 
-  void _fetchDeviceListFromFirebase() {
+  Future<void> _fetchDeviceListFromFirebase() async {
     var _currentUser = Provider.of<CurrentUser>(context, listen: false);
+
+    _clearDeviceList();
+
     databaseReference
         .collection('users')
         .where('email', isEqualTo: "${_currentUser.email}")
@@ -224,40 +219,44 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  void _fetchDeviceInfoFromOctave() async {
+  Future<void> _fetchDeviceInfoFromOctave() async {
+    print('mapping device list to device names...');
+    List<String> _deviceNames =
+        _devices.map((deviceCard) => deviceCard.name).toList();
+    print('mapped list = ' + _deviceNames.toString());
     List<DeviceCard> recentlyFetchedFromCloudFunction = [];
-    for (var d in _devices) {
-      Response response = await Octave.getDevice(d.name);
-      Map<String, dynamic> deviceData = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        recentlyFetchedFromCloudFunction.add(
-          DeviceCard(
-            imei: deviceData['body']['hardware']['imei'],
-            name: deviceData['body']['name'],
-            status: _deviceStatusFromOctaveResponse(deviceData),
-          ),
-        );
-      }
-    }
 
-    recentlyFetchedFromCloudFunction.forEach((element) {
-      print(element.name);
-      _addDevice(element);
-    });
+    _clearDeviceList();
+
+    for (var name in _deviceNames) {
+      print('fetching ' + name + ' from Octave');
+      Response response = await Octave.getDevice(name);
+      Map<String, dynamic> deviceData = jsonDecode(response.body);
+      print('fetched ' +
+          deviceData['body']['name'] +
+          ", " +
+          deviceData['body']['hardware']['imei'] +
+          ' from Octave');
+      if (response.statusCode == 200) {
+        var latestDeviceCard = DeviceCard(
+          imei: deviceData['body']['hardware']['imei'],
+          name: deviceData['body']['name'],
+          status: _deviceStatusFromOctaveResponse(deviceData),
+        );
+        _addDevice(latestDeviceCard);
+      }
+      print('fetched device list =  ' + _devices.toString());
+    }
   }
 
   Future<void> _refreshDeviceList() async {
-    _fetchDeviceListFromFirebase();
     _fetchDeviceInfoFromOctave();
-    _createDeviceList();
   }
 
   @override
   void initState() {
     super.initState();
     _fetchDeviceListFromFirebase();
-    _fetchDeviceInfoFromOctave();
-    _createDeviceList();
   }
 
   @override
