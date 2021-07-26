@@ -124,4 +124,50 @@ app.get("/:deviceName", (req, res, err) => {
   });
 });
 
+app.delete("/:deviceName", (req, res, err) => {
+  const options = {
+    hostname: "octave-api.sierrawireless.io",
+    path: `/v5.0/capstone_uop2021/device/${req.params.deviceName}`,
+    method: "DELETE",
+    headers: {
+      "X-Auth-Token": functions.config().octave.auth_token,
+      "X-Auth-User": functions.config().octave.auth_user,
+    },
+  };
+
+  https
+    .request(options, (response) => {
+      response.setEncoding("utf8");
+      var body = "";
+
+      response.on("data", (chunk) => {
+        body += chunk;
+      });
+
+      response.on("end", () => {
+        var result = JSON.parse(body);
+
+        if (result.head.status === 200) {
+          res.status(200).json(result);
+        } else {
+          res
+            .status(response.statusCode)
+            .send(
+              "Unsuccessful device delete. Result = " + JSON.stringify(result)
+            );
+        }
+      });
+
+      response.on("error", (err) => {
+        console.log(err);
+        res.status(500).send(err);
+      });
+    })
+    .end();
+
+  req.on("error", (err) => {
+    res.status(500).send(err);
+  });
+});
+
 exports.device = functions.https.onRequest(app);
