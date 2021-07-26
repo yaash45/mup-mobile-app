@@ -258,6 +258,19 @@ class _DashboardState extends State<Dashboard> {
           name: deviceData['body']['name'],
           status: _deviceStatusFromOctaveResponse(deviceData),
         );
+
+        print('pushing ' +
+            latestDeviceCard.name +
+            ', ' +
+            latestDeviceCard.imei +
+            ' to firebase');
+        //Push latest info for device to firebase
+        databaseReference
+            .collection("devices")
+            .doc(latestDeviceCard.imei)
+            .set(deviceData);
+
+        //Append device to device list on UI
         _addDevice(latestDeviceCard);
       }
       print('fetched device list =  ' + _devices.toString());
