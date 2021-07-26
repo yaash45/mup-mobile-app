@@ -43,7 +43,6 @@ class _AddNewDevicePageState extends State {
   }
 
   void _addDevice() async {
-    /*
     setState(() {
       if (_imei == '') {
         _showToast(context, "Please enter IMEI number for your device");
@@ -54,7 +53,8 @@ class _AddNewDevicePageState extends State {
           // TODO: Get device count for account and set name accordingly
           _name = 'mangoh-1';
         }
-        /*
+      }
+      /*
         Map<String, dynamic> deviceData = {
           "user": user,
           "imei": _imei,
@@ -72,28 +72,86 @@ class _AddNewDevicePageState extends State {
           Navigator.pop(context);
         });
       } */
-      
+    });
+
+    //Creating a device and waiting for the response to be started
+    var createdDeviceResponse =
+        await Octave().createDevice(_name, _imei, _serial);
+    print(createdDeviceResponse.body);
+
+    //Checking is reponse was okay
+    if (jsonDecode(createdDeviceResponse.body)['head']['status'] == 201 &&
+        jsonDecode(createdDeviceResponse.body)['body']['state'] == "STARTED") {
+      //var reponse;
+      //var response1 = Future.delayed(const Duration(seconds: 5), () => Octave().ReadDevice(_name));
+      //response1.
+      //await Octave().ReadDevice(_name);
+      sleep(Duration(seconds: 15));
+      print(_name);
+      var response = await Octave.getDevice(
+          jsonDecode(createdDeviceResponse.body)['body']['deviceIds'][0]
+              .toString());
+      print(response);
+      print(jsonDecode(response.body));
+
+      //Grabbing response from Octave
+      Map<String, dynamic> data = jsonDecode(response.body);
+      var imei = jsonDecode(response.body)['body']['hardware']['imei'];
+      //Stored response in devices collection with IMEI as docID
+      final databaseReference = FirebaseFirestore.instance;
+      databaseReference.collection("devices").doc(imei.toString()).set(data);
+
+      //Grabbing a reference from that device
+      DocumentReference reference =
+          databaseReference.collection('devices').doc(imei.toString());
+      var DevicesList = [reference];
+
+      //Grabbing current users UID
+      CurrentUser _currentUser =
+          Provider.of<CurrentUser>(context, listen: false);
+      var uid = _currentUser.getCurrentUser.uid.toString();
+
+      //Adding device to Users collection with a reference
+      databaseReference
+          .collection('users')
+          .doc(uid)
+          .update({'Devices': FieldValue.arrayUnion(DevicesList)});
     }
-    ); */
-    //var createdDeviceResponse = await Octave().CreateDevice();
-    //print(createdDeviceResponse.body);
 
-    var response = await Octave.getDevice('raad023');
+    /* 
+    var response =  await Octave().ReadDevice('jarvin');
+    //var response = await Octave().createDevice();
+    print(jsonDecode(response.body));
+    
+    var imei = jsonDecode(response.body)['body']['hardware']['imei'];
+    /*
+    var empty = jsonDecode(response.body)['body'];
+    if (empty?.isEmpty ?? true){
+      print('true');
+    } */
+
+    print(imei);
+    // var response =  await Octave().ReadDevice();
+   
     Map<String, dynamic> data = jsonDecode(response.body);
-
+     
+    
     final databaseReference = FirebaseFirestore.instance;
-    databaseReference.collection("devices").doc("352653090202201").set(data);
-    DocumentReference reference =
-        databaseReference.collection('devices').doc('352653090202201');
+    databaseReference.collection("devices").doc('jarvin').set(data);
+    DocumentReference reference = databaseReference.collection('devices').doc('jarvin');
     var DevicesList = [reference];
-    Map<String, List> userData = {'Devices': DevicesList};
 
-    databaseReference
-        .collection('users')
-        .doc('HEbxCQEvNHYSmwp9orEW2ViWWA13')
-        .update(userData);
+    /*
+    Map<String, List> userData = {
+    'Devices': DevicesList
+     }; */
+    CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
+    var uid = _currentUser.getCurrentUser.uid.toString();
 
-    print("yes");
+    databaseReference.collection('users').doc(uid).update({
+      'Devices': FieldValue.arrayUnion(DevicesList)
+    });
+    */
   }
 
   void _setImei(imei) {
@@ -165,7 +223,7 @@ class _AddNewDevicePageState extends State {
                   ),
                   TextField(
                     decoration: InputDecoration(
-                      labelText: "Device name (optional)",
+                      labelText: "Device name",
                       hintText: "This is your device nickname",
                       hintStyle: TextStyle(color: Colors.grey[500]),
                       border: OutlineInputBorder(
@@ -201,3 +259,12 @@ class _AddNewDevicePageState extends State {
     });
   }
 }
+
+/*
+mupFirestore.insertObject('devices', deviceData).then((value) {
+          print(value.id);
+          clearTextInput();
+          _showToast(context,
+              "Added device with IMEI = $_imei, Serial = $_serial, Name = $_name");
+          Navigator.pop(context);
+        }); */
