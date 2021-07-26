@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mup_app/backend/database.dart';
+import 'package:mup_app/models/DeviceData.dart';
 import 'package:mup_app/states/CurrentUser.dart';
 import 'package:mup_app/templates/appbar.dart';
 //import 'package:permission/permission.dart';
@@ -83,7 +85,7 @@ for (var doc in docs) {
        Map<String,dynamic> devicemap = deviceSnapshot.data();
        Map<String,dynamic> s = devicemap['body'];
        //print(s['report']);
-       print(devicemap['body']['summary']['/location/coordinates/value']['v']);
+      /// print(devicemap['body']['summary']['/location/coordinates/value']['v']);
        var lat = jsonDecode(devicemap['body']['summary']['/location/coordinates/value']['v']);
        //print(lat['lat'].runtimeType);
       // setState(() => Latitude = lat['lat']);
@@ -317,8 +319,11 @@ for (var doc in docs) {
   Widget build(BuildContext context) {
   CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
   var email = _currentUser.getCurrentUser.email.toString();
-  getImei(email);
-  
+  //getImei(email);
+ 
+
+  //Stream<DeviceData> mydevicedata = OurDatabase().myDevice(deviceImei, 'HEbxCQEvNHYSmwp9orEW2ViWWA13');
+  //print(mydevicedata.toString());
     return Scaffold(
         appBar: MupAppBar(
           'Device Info',
@@ -433,8 +438,8 @@ for (var doc in docs) {
          if (doc.data() != null) {
          var data = doc.data() as Map<String, dynamic>;
          var name = data['value']; 
-         print(data['unit'].toString());
-         print(name);
+        // print(data['unit'].toString());
+        // print(name);
          type = data['type'];
          unit = data['unit'];
          value = data['value'].round();
@@ -603,11 +608,23 @@ for (var doc in docs) {
         return  _buildDataTab(type.toString(),unit.toString(),value.toString(),date.toString());
         
       }
-          }),     
+          }),
+
      myStreamBuilder('pressure'),
      myStreamBuilder('iaq'),
-     myStreamBuilder('breath_voc')
-
+     myStreamBuilder('breath_voc'),
+     StreamBuilder<DeviceData>(
+       stream: OurDatabase().myDevice('352653090202201', 'HEbxCQEvNHYSmwp9orEW2ViWWA13'),
+       builder: (context, snapshot) {
+         if(!snapshot.hasData){
+           return Text('No Data');
+         }
+         else{
+           DeviceData theDeviceData = snapshot.data;
+           return Text(theDeviceData.temperature.toString());
+         }
+       }
+     ),
           ],
           staggeredTiles: [
             StaggeredTile.extent(2, 220.0),
@@ -619,6 +636,7 @@ for (var doc in docs) {
             StaggeredTile.extent(2, 110.0),
             StaggeredTile.extent(2, 110.0),
             StaggeredTile.extent(2, 110.0),
+            StaggeredTile.extent(2, 300.0),
           ],
         ));
   }
