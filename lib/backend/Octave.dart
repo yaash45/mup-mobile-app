@@ -21,6 +21,18 @@ class Octave {
     return response;
   }
 
+  static Future<Response> deleteDevice(
+      String name, String imei, String userEmail) async {
+    Response response;
+    try {
+      response = await delete(Uri.parse(
+          "https://us-central1-capstonemuop.cloudfunctions.net/device/$name&$imei&$userEmail"));
+    } catch (e) {
+      print(e);
+    }
+    return response;
+  }
+
   Future<Response> createDevice(String name, String imei, String fsn) async {
     try {
       Response response = await post(

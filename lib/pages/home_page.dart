@@ -133,15 +133,28 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  void _deleteDevice(index) {
+  Future<void> _deleteDevice(index) async {
     String deletedDeviceName = _devices[index].name;
-    setState(() {
-      _devices.removeAt(index);
-    });
+    String deletedDeviceImei = _devices[index].imei;
+    var _currentUser = Provider.of<CurrentUser>(context, listen: false);
 
-    // Then show a snackbar.
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(deletedDeviceName + " deleted")));
+    print('in delete device');
+
+    Response response = await Octave.deleteDevice(
+        deletedDeviceName, deletedDeviceImei, _currentUser.email);
+
+    print('delete response = ' + response.body.toString());
+
+    if (response.statusCode == 200) {
+      // Then show a snackbar.
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(deletedDeviceName + " deleted")));
+      await _fetchDeviceListFromFirebase();
+    } else {
+      // Then show a snackbar.
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not delete device. Internal error.')));
+    }
   }
 
   void _beginLoad() {
@@ -184,8 +197,8 @@ class _DashboardState extends State<Dashboard> {
               },
               key: Key(_devices[index].name),
               background: stackBehindDismiss(),
-              onDismissed: (direction) {
-                _deleteDevice(index);
+              onDismissed: (direction) async {
+                await _deleteDevice(index);
               },
               child: MupDeviceCard(device: _devices[index]),
             ));
@@ -272,6 +285,8 @@ class _DashboardState extends State<Dashboard> {
 
         //Append device to device list on UI
         _addDevice(latestDeviceCard);
+      } else {
+        break;
       }
       print('fetched device list =  ' + _devices.toString());
     }
