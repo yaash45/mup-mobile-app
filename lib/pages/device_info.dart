@@ -318,7 +318,7 @@ for (var doc in docs) {
   @override
   Widget build(BuildContext context) {
   CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
-  var email = _currentUser.getCurrentUser.email.toString();
+  //var email = _currentUser.getCurrentUser.email.toString();
   //getImei(email);
  
 
@@ -367,10 +367,7 @@ for (var doc in docs) {
                 ),
               ),
             )
-
-                //  ),
-
-                ),
+),
             _buildTile(
               Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -613,7 +610,8 @@ for (var doc in docs) {
      myStreamBuilder('pressure'),
      myStreamBuilder('iaq'),
      myStreamBuilder('breath_voc'),
-     StreamBuilder<DeviceData>(
+     
+    /* StreamBuilder<DeviceData>(
        stream: OurDatabase().myDevice('352653090202201', 'HEbxCQEvNHYSmwp9orEW2ViWWA13'),
        builder: (context, snapshot) {
          if(!snapshot.hasData){
@@ -621,10 +619,10 @@ for (var doc in docs) {
          }
          else{
            DeviceData theDeviceData = snapshot.data;
-           return Text(theDeviceData.temperature.toString());
+           return Text(theDeviceData.name.toString());
          }
        }
-     ),
+     ),  */
           ],
           staggeredTiles: [
             StaggeredTile.extent(2, 220.0),
