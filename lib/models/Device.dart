@@ -1,9 +1,16 @@
-class Device {
+enum DeviceStatus {
+  PENDING,
+  READY,
+}
+
+class DeviceCard {
   String imei;
   String name;
+  DeviceStatus status;
 
-  Device({
+  DeviceCard({
     this.imei,
     this.name,
+    this.status = DeviceStatus.PENDING,
   });
 }
