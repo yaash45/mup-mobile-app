@@ -51,7 +51,7 @@ Stream<DeviceData> myDevice(String imei, String uid) {
     .orderBy("timestamp", descending: true)
     .limit(1)
     .snapshots();
-
+    
     return CombineLatestStream([octaveData,tempdata], (values) => values.toList()).asBroadcastStream().map((snapshot) => DeviceData.fromFirebase(doc: snapshot));
   }
 
