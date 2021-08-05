@@ -8,22 +8,6 @@ class SensorProfile {
   SensorProfileItem breathVoc;
   SensorProfileItem iaq;
 
-  // SensorProfile() {
-  //   // Temperature
-  //   this.temperature = SensorProfileItem('Temperature', Icon(Icons.thermostat));
-  //   // Pressure
-  //   this.pressure = SensorProfileItem('Pressure', Icon(Icons.crop_square));
-  //   // Humidity
-  //   this.humidity = SensorProfileItem('Humidity', Icon(Icons.waterfall_chart));
-  //   // Co2 Equivalent
-  //   this.co2Equivalent = SensorProfileItem('CO2', Icon(Icons.air));
-  //   // Breath VOC
-  //   this.breathVoc =
-  //       SensorProfileItem('Breath VOC', Icon(Icons.pattern_rounded));
-  //   // IAQ
-  //   this.iaq = SensorProfileItem('IAQ', Icon(Icons.air));
-  // }
-
   SensorProfile(
       {this.temperature,
       this.pressure,

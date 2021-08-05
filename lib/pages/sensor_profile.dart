@@ -34,7 +34,7 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
     return Scaffold(
       appBar: MupAppBar(
         'Sensor Profile',
-        leadingBackButton: true,
+        leadingBackButton: false,
       ),
       body: StreamBuilder<SensorProfile>(
           stream: _db.getSensorProfile(imei),
