@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mup_app/backend/database.dart';
 import 'package:mup_app/models/DeviceData.dart';
@@ -14,6 +15,9 @@ import 'package:flutter_sparkline/flutter_sparkline.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:signal_strength_indicator/signal_strength_indicator.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 Map<String, String> SensorNames = {'iaq': 'Indoor Air Quality', 'co2e': 'Carbon Dioxide Equivalent', 'breath_voc': 'Breath VOC',
 'temperature' : 'Temperature', 'pressure' : 'Pressure', 
@@ -25,7 +29,8 @@ Map<String, IconData> IconValues = {
 'iaq' : Icons.waves,
 'co2e' : Icons.waves_rounded,
 'pressure': Icons.lock_clock,
-'breath_voc' : Icons.whatshot_sharp
+'breath_voc' : Icons.whatshot_sharp,
+'temperature' : Icons.thermostat_outlined
 };
 
 class DeviceInfo extends StatefulWidget {
@@ -54,50 +59,15 @@ class _DeviceInfoState extends State<DeviceInfo> {
     await Permission.location.serviceStatus.isEnabled;
   }
 
-Set<Marker> _createMarker() {
+Set<Marker> _createMarker(double lat , double lon) {
   return {
     Marker(
         markerId: MarkerId("marker_1"),
-        position: LatLng(49.123151, -122.883925),
+        position: LatLng(lat, lon),
         infoWindow: InfoWindow(title: 'Device Location'),
         ),
   };
 }
- 
- void getImei(String email) async {
-
- QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance 
-    .collection('users')
-    .where('email', isEqualTo: email)
-    .get();
-
-List<QueryDocumentSnapshot> docs = snapshot.docs;
-for (var doc in docs) {
-  if (doc.data() != null) {
-    var data = doc.data() as Map<String, dynamic>;
-    var name = data['fullName']; // You can get other data in this manner. 
-     List<dynamic> devices = data['Devices'];
-     var devices2 = data['Devices'];
-     devices.forEach((element) {
-       element.get().then((deviceSnapshot){
-
-      // print(deviceSnapshot.id);
-       Map<String,dynamic> devicemap = deviceSnapshot.data();
-       Map<String,dynamic> s = devicemap['body'];
-       //print(s['report']);
-      /// print(devicemap['body']['summary']['/location/coordinates/value']['v']);
-       var lat = jsonDecode(devicemap['body']['summary']['/location/coordinates/value']['v']);
-       //print(lat['lat'].runtimeType);
-      // setState(() => Latitude = lat['lat']);
-      // Latitude = lat['lat'];
-      // Longitude = lat['lon'];
-      // deviceIMEI = deviceSnapshot.id;
-       });
-     });
-    
-  }
-}
- }
 
   //Adding chart
   final List<List<double>> charts = [
@@ -314,338 +284,71 @@ for (var doc in docs) {
   ];
   String actualDropdown = chartDropdownItems[0];
   int actualChart = 0;
+  List<double> tilesize =[
+    220.0,
+    180.0,
+    180.0,  
 
-  @override
-  Widget build(BuildContext context) {
-  CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
-  var email = _currentUser.getCurrentUser.email.toString();
-  //getImei(email);
- 
+    90.0,
+    90.0,
+    90.0,
+    90.0,
+    90.0,
+    90.0,
+  ];
+  List<double> originaltilesizes =[
+    220.0,
+    180.0,
+    180.0, 
+    90.0,
+    90.0,
+    90.0,
+    90.0,
+    90.0,
+    90.0,
+  ];
 
-  //Stream<DeviceData> mydevicedata = OurDatabase().myDevice(deviceImei, 'HEbxCQEvNHYSmwp9orEW2ViWWA13');
-  //print(mydevicedata.toString());
-    return Scaffold(
-        appBar: MupAppBar(
-          'Device Info',
-          leadingBackButton: true,
-        ),
-        body: StaggeredGridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12.0,
-          mainAxisSpacing: 12.0,
-          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-          children: <Widget>[
-            _buildTile(
-                // Padding
-                // (
-                //   padding: const EdgeInsets.all(1),
-                //  child:
-
-                //   Flexible(
-                //   child:
-                Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
-                ),
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  heightFactor: 1,
-                  widthFactor: 1,
-                  child: GoogleMap(
-                    onMapCreated: _onMapCreated,
-                    myLocationEnabled: true,
-                    markers: _createMarker(),
-                    initialCameraPosition: CameraPosition(
-                      target: _center,
-                      zoom: 9.0,
-                    ),
-                  ),
-                ),
-              ),
-            )
-
-                //  ),
-
-                ),
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Material(
-                          color: Colors.teal,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Icon(Icons.settings_applications,
-                                color: Colors.white, size: 30.0),
-                          )),
-                      Padding(padding: EdgeInsets.only(bottom: 16.0)),
-                      Text('IMEI',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 24.0)),
-                      Text(deviceImei, style: TextStyle(color: Colors.black45)),
-                    ]),
-              ),
-            ),
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Material(
-                          color: Colors.amber,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Icon(Icons.notifications,
-                                color: Colors.white, size: 30.0),
-                          )),
-                      Padding(padding: EdgeInsets.only(bottom: 16.0)),
-                      Text('Alerts',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 24.0)),
-                      Text('All ', style: TextStyle(color: Colors.black45)),
-                    ]),
-              ),
-            ),
-          StreamBuilder(
-          stream: FirebaseFirestore.instance.collection("datapoints").where("type", isEqualTo: 'temperature').snapshots(),
-          builder: (context, snapshot) {
-           if (!snapshot.hasData) {
-        return Text(
-          'No Data...',
-        );
-      } else { 
-        var type;
-        var unit;
-        var value;
-        var date;
-        List<QueryDocumentSnapshot> docs = snapshot.data.docs;
-        for (var doc in docs) {
-         if (doc.data() != null) {
-         var data = doc.data() as Map<String, dynamic>;
-         var name = data['value']; 
-        // print(data['unit'].toString());
-        // print(name);
-         type = data['type'];
-         unit = data['unit'];
-         value = data['value'].round();
-         date =data['timestamp'];
-        
-        }
-        }
-        return  _buildTile(
-              Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(type.substring(0,1).toUpperCase() + type.substring(1),
-                                  style: TextStyle(color: Colors.blueAccent)
-                                  
-                                  ),
-                              Text(value.toString() + unit.toString(),
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 34.0)), 
-                            ],
-                          ),
-                          Text(readTimestamp(date),
-                                  style: TextStyle(color: Colors.blueAccent)
-                                  
-                                  ) 
-                        ],
-                      ),
-                      Padding(padding: EdgeInsets.only(bottom: 4.0, top: 3.0)),
-                      Sparkline(
-                        data: charts[actualChart],
-                        lineWidth: 5.0,
-                        lineColor: Colors.greenAccent,
-                      )
-                    ],
-                  )),
-            );
-      } 
-         }),
-
-            ////////
-            /*
-            _buildTile(
-              Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('Revenue',
-                                  style: TextStyle(color: Colors.green)),
-                              Text('\$16K',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 34.0)),
-                            ],
-                          ),
-                          DropdownButton(
-                              isDense: true,
-                              value: actualDropdown,
-                              onChanged: (String value) => setState(() {
-                                    actualDropdown = value;
-                                    actualChart = chartDropdownItems
-                                        .indexOf(value); // Refresh the chart
-                                  }),
-                              items: chartDropdownItems.map((String title) {
-                                return DropdownMenuItem(
-                                  value: title,
-                                  child: Text(title,
-                                      style: TextStyle(
-                                          color: Colors.blue,
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 14.0)),
-                                );
-                              }).toList())
-                        ],
-                      ),
-                      Padding(padding: EdgeInsets.only(bottom: 4.0)),
-                      Sparkline(
-                        data: charts[actualChart],
-                        lineWidth: 5.0,
-                        lineColor: Colors.greenAccent,
-                      )
-                    ],
-                  )),
-            ),
-    */
-    ////  
-    /*    
-            _buildTile(
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text('Shop Items',
-                              style: TextStyle(color: Colors.redAccent)),
-                          Text('173',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 34.0))
-                        ],
-                      ),
-                      Material(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(24.0),
-                          child: Center(
-                              child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Icon(Icons.store,
-                                color: Colors.white, size: 30.0),
-                          )))
-                    ]),
-              ),
-            )
-            */
-       StreamBuilder(
-          stream: FirebaseFirestore.instance.collection("datapoints").where("type", isEqualTo: 'humidity').snapshots(),
-          builder: (context, snapshot) {
-           if (!snapshot.hasData) {
-        return Text(
-          'No Data...',
-        );
-      } else { 
-        var type;
-        var unit;
-        var value;
-        var date;
-        List<QueryDocumentSnapshot> docs = snapshot.data.docs;
-        for (var doc in docs) {
-         if (doc.data() != null) {
-         var data = doc.data() as Map<String, dynamic>;
-         var name = data['value']; 
-         type = data['type'];
-         unit = data['unit'];
-         value = data['value'].round();
-         date =data['timestamp'];
-        }
-        }
-        return  _buildDataTab(type.toString(),unit.toString(),value.toString(),date.toString());
-        
-      }
-          }),
-
-     myStreamBuilder('pressure'),
-     myStreamBuilder('iaq'),
-     myStreamBuilder('breath_voc'),
-     StreamBuilder<DeviceData>(
-       stream: OurDatabase().myDevice('352653090202201', 'HEbxCQEvNHYSmwp9orEW2ViWWA13'),
-       builder: (context, snapshot) {
-         if(!snapshot.hasData){
-           return Text('No Data');
-         }
-         else{
-           DeviceData theDeviceData = snapshot.data;
-           return Text(theDeviceData.temperature.toString());
-         }
-       }
-     ),
-          ],
-          staggeredTiles: [
-            StaggeredTile.extent(2, 220.0),
-            StaggeredTile.extent(1, 180.0),
-            StaggeredTile.extent(1, 180.0),
-            
-            StaggeredTile.extent(2, 220.0),
-            StaggeredTile.extent(2, 110.0),
-            StaggeredTile.extent(2, 110.0),
-            StaggeredTile.extent(2, 110.0),
-            StaggeredTile.extent(2, 110.0),
-            StaggeredTile.extent(2, 300.0),
-          ],
-        ));
+  Widget tileswitch(int index){
+    setState(() {
+      
+          if(tilesize[index] != 400){
+          tilesize[index]= 400;
+          }
+          else {
+            tilesize[index]=originaltilesizes[index];
+          }
+        });
   }
+  Widget _buildTile( int indexnum,Widget child, {Function() onTap}) {
+  return Material(
+      elevation: 14.0,
+      borderRadius: BorderRadius.circular(12.0),
+      shadowColor: Color(0x802196F3),
+      child: InkWell(
+          // Do onTap() if it isn't null, otherwise do print()
+          /* onTap: onTap != null
+              ? () => onTap()
+              : () {
+                  print('Not set yet');
+                }, */
+          onTap: () => {
+            tileswitch(indexnum)
+           
+          },
+          child: child));
 }
-
+ Widget _buildPrelimTile(Widget child, {Function() onTap}) {
+  return Material(
+      elevation: 14.0,
+      borderRadius: BorderRadius.circular(12.0),
+      shadowColor: Color(0x802196F3),
+      child: InkWell(
+      child: child));
+}
 String readTimestamp(int timestamp) {
     var now = DateTime.now();
     var format = DateFormat('HH:mm a');
-    var date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    var date = DateTime.fromMicrosecondsSinceEpoch(timestamp * 1000);
     var diff = now.difference(date);
     var time = '';
 
@@ -653,38 +356,24 @@ String readTimestamp(int timestamp) {
       time = format.format(date);
     } else if (diff.inDays > 0 && diff.inDays < 7) {
       if (diff.inDays == 1) {
-        time = diff.inDays.toString() + ' DAY AGO';
+        time = diff.inDays.toString() + 'd';
       } else {
-        time = diff.inDays.toString() + ' DAYS AGO';
+        time = diff.inDays.toString() + ' d';
       }
     } else {
       if (diff.inDays == 7) {
-        time = (diff.inDays / 7).floor().toString() + ' WEEK AGO';
+        time = (diff.inDays / 7).floor().toString() + 'W';
       } else {
 
-        time = (diff.inDays / 7).floor().toString() + ' WEEKS AGO';
+        time = (diff.inDays / 7).floor().toString() + 'W';
       }
     }
 
     return time;
   }
-Widget _buildTile(Widget child, {Function() onTap}) {
-  return Material(
-      elevation: 14.0,
-      borderRadius: BorderRadius.circular(12.0),
-      shadowColor: Color(0x802196F3),
-      child: InkWell(
-          // Do onTap() if it isn't null, otherwise do print()
-          onTap: onTap != null
-              ? () => onTap()
-              : () {
-                  print('Not set yet');
-                },
-          child: child));
-}
-
-Widget _buildDataTab (String type, String unit, String value, String date) {
+Widget _buildDataTab (String type, String unit, String value, String date, int indexnum) {
 return   _buildTile(
+              indexnum,
               Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Row(
@@ -712,39 +401,444 @@ return   _buildTile(
                             padding: EdgeInsets.all(16.0),
                             child: Icon(IconValues[type],
                                 color: Colors.white, size: 30.0),
-                          )))
+                          )
+                          )
+                          )
                     ]),
               ),
             );
     ////      
 }
+Widget testWidget(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph)
+{
+  return _buildTile(
+              indexnum,
+              Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(type.substring(0,1).toUpperCase() + type.substring(1),
+                                  style: TextStyle(color: Colors.blueAccent)
+                                  
+                                  ),
+                              Text(value.toString() + unit.toString(),
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 34.0)), 
+                            ],
+                          ),
+                          Text(returnDate(date),
+                                  style: TextStyle(color: Colors.blueAccent)
+                                  
+                                  ) 
+                        ],
+                      ),
+                      //Padding(padding: EdgeInsets.only(bottom: 10, top: 3.0)),
+                      SizedBox(
+                        width: 800, height: 300,
+                        child: SfCartesianChart(
+                       
+                        
+                        primaryXAxis: CategoryAxis(
+                          
+                        ),
+                        // Chart title
+                    
+                        borderColor: Colors.indigo,
+                        plotAreaBorderWidth: 2,
+                        trackballBehavior: TrackballBehavior(
+                        enable: true,
+        activationMode: ActivationMode.singleTap,
+        lineType: TrackballLineType.vertical,
+        tooltipSettings: const InteractiveTooltip(format: 'point.x : point.y')), 
+                     //tooltipBehavior: TooltipBehavior(enable: true),
+                     
+                        series: <ChartSeries<_DataPoints, String>>[
+                        LineSeries<_DataPoints, String>(
+                    dataSource: graph,
+                    
+                    xValueMapper: (_DataPoints sales, _) => sales.time,
+                    yValueMapper: (_DataPoints sales, _) => sales.value,
+                    name: 'Sales',
+                    // Enable data label
+                    //dataLabelSettings: DataLabelSettings(isVisible: true),
+                    
+                    markerSettings: const MarkerSettings(isVisible: true,
+                    
+                    ),
+                   
+                    )
+              ]),
+                      )
+                    ],
+                  )),
+            );
+}
 
-Widget myStreamBuilder(sensorType){
- return StreamBuilder(
-          stream: FirebaseFirestore.instance.collection("datapoints").where("type", isEqualTo: sensorType).snapshots(),
+Widget testWidget2(String type, String unit, String value, int date, List<double>charts, int indexnum){
+  return _buildTile(
+             indexnum,
+              Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                       // crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                           Material(
+                          color: Colors.blue[200],
+                          borderRadius: BorderRadius.circular(20.0),
+                          child: Center(
+                              child: Padding(
+                            padding: EdgeInsets.all(15.0),
+                            child: Icon(IconValues[type],
+                                color: Colors.white, size: 25.0),
+                          )
+                          )
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text(SensorNames[type],
+                                  style: TextStyle(color: Colors.blueAccent
+                      
+                                  )
+                                  ),
+                            
+                             Text(readTimestamp(date),
+                                  style: TextStyle(color: Colors.blueAccent)
+                                  
+                                  )         
+                            ],
+                          ),
+                          SizedBox(
+                            height: 30,
+                            width: 120,
+                            child: Sparkline(
+                        data: charts,
+                        lineWidth: 3.0,
+                        lineColor: Colors.lightBlueAccent,
+                        ),
+                          ),
+                          Text(value.toString() + unit.toString(),
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 25.0)), 
+                        ],
+                      ),
+                     // Padding(padding: EdgeInsets.only(bottom: 0, top: 3.0)),
+                     /* Sparkline(
+                        data: charts,
+                        lineWidth: 3.0,
+                        lineColor: Colors.green,
+                        fillMode: FillMode.below,
+                        fillGradient: LinearGradient(colors: [Colors.green, Colors.green[50]], 
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter
+                        ),
+                      ) */
+                    ],
+                  )),
+            );
+}
+Widget testWidget3(String type, String unit, String value, int date, List<double>charts, int indexnum){
+  return _buildTile(
+              indexnum,
+              Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        //crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                           Material(
+                          color: Colors.blue[200],
+                          borderRadius: BorderRadius.circular(20.0),
+                          child: Center(
+                              child: Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Icon(IconValues[type],
+                                color: Colors.white, size: 30.0),
+                          )
+                          )
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            //crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text(type.substring(0,1).toUpperCase() + type.substring(1),
+                                  style: TextStyle(color: Colors.blueAccent)
+                                  
+                                  ),
+                              Text(value.toString() + unit.toString(),
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 20.0)),
+                             Text(readTimestamp(date),
+                                  style: TextStyle(color: Colors.blueAccent)
+                                  
+                                  )        
+                            ],
+                          ),
+                         Spacer(),
+                          SizedBox(
+                            height: 30,
+                            width: 190,
+                            child: Sparkline(
+                        data: charts,
+                        lineWidth: 3.0,
+                        lineColor: Colors.lightBlueAccent,
+                        
+                        ),
+                          ),
+                           
+                        ],
+                      ),
+                     // Padding(padding: EdgeInsets.only(bottom: 0, top: 3.0)),
+                     /* Sparkline(
+                        data: charts,
+                        lineWidth: 3.0,
+                        lineColor: Colors.green,
+                        fillMode: FillMode.below,
+                        fillGradient: LinearGradient(colors: [Colors.green, Colors.green[50]], 
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter
+                        ),
+                      ) */
+                    ],
+                  )),
+            );
+}
+
+Widget CustomDataTab(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph){
+  if(tilesize[indexnum] == originaltilesizes[indexnum]){
+    return testWidget2(type, unit, value, date, charts, indexnum);
+  }
+  else return testWidget(type, unit, value, date, charts, indexnum, graph);
+}
+String returnDate(int timestamp){
+var dt = DateTime.fromMillisecondsSinceEpoch(timestamp);
+// 12 Hour format:
+var d12 = DateFormat('hh:mm a').format(dt); // 12/31/2000, 10:00 PM
+return d12;
+}
+List<double> returnSparkChart(int index, DeviceData theDeviceData){
+  List<double> data = [];
+  theDeviceData.TempList[index].forEach((element) {
+        data.add(element['value']);
+       }); 
+  return data;
+}
+List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
+  List<_DataPoints> data = [];
+  theDeviceData.TempList[index].forEach((element) {
+        data.add(_DataPoints(returnDate(element['timestamp']), element[
+                'value'
+              ]));
+       }); 
+  return data;
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+  CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
+  var email = _currentUser.getCurrentUser.email.toString();
+
+  //Stream<DeviceData> mydevicedata = OurDatabase().myDevice(deviceImei, 'HEbxCQEvNHYSmwp9orEW2ViWWA13');
+    return Scaffold(
+        appBar: MupAppBar(
+          'Device Info',
+          leadingBackButton: true,
+        ),
+        body: StreamBuilder<DeviceData>(
+          stream: OurDatabase().myDevice('352653090202201', 'HEbxCQEvNHYSmwp9orEW2ViWWA13'),
           builder: (context, snapshot) {
-           if (!snapshot.hasData) {
-        return Text(
-          'No Data...',
-        );
-      } else { 
-        var type;
-        var unit;
-        var value;
-        var date;
-        List<QueryDocumentSnapshot> docs = snapshot.data.docs;
-        for (var doc in docs) {
-         if (doc.data() != null) {
-         var data = doc.data() as Map<String, dynamic>;
-         var name = data['value']; 
-         type = data['type'];
-         unit = data['unit'];
-         value = data['value'].round();
-         date =data['timestamp'];
-        }
-        }
-        return  _buildDataTab(type.toString(),unit.toString(),value.toString(),date.toString());
-        
-      }
-          });
+             if(!snapshot.hasData){
+           return CircularProgressIndicator(semanticsLabel: "Loading",);
+         }
+         else{
+           DeviceData theDeviceData = snapshot.data;
+           int startingTileIndex = 3;
+         /*  List<_DataPoints> TempPlot = [];
+           List<double> Temperaturedata = [];
+            theDeviceData.TempList[0].forEach((element) {
+              Temperaturedata.add(element['value']);
+              TempPlot.add(_DataPoints(returnDate(element['timestamp']), element[
+                'value'
+              ]));
+            }); */
+            List<double> Humiditydata = [];
+             theDeviceData.TempList[1].forEach((element) {
+              Humiditydata.add(element['value']);
+            }); 
+            List<double> iaqdata = [];
+             theDeviceData.TempList[2].forEach((element) {
+              iaqdata.add(element['value']);
+            }); 
+            double num1 = theDeviceData.TempList[5][0]['value'].toDouble();
+            print(num1);
+            print(theDeviceData.TempList[5][0]['value'].runtimeType);
+           //  print(theDeviceData.TempList[5][0]['value'].runtimeType);
+            // theDeviceData.TempList[0][1]['value'].toString()
+          //  print(theDeviceData.TempList[0].value);
+          return StaggeredGridView.count(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12.0,
+              mainAxisSpacing: 12.0,
+              padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+              children: <Widget>[
+                _buildPrelimTile(
+                    Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
+                    ),
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      heightFactor: 1,
+                      widthFactor: 1,
+                      child: GoogleMap(
+                        onMapCreated: _onMapCreated,
+                        myLocationEnabled: true,
+                        markers: _createMarker(theDeviceData.lat, theDeviceData.lon),
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(theDeviceData.lat, theDeviceData.lon),
+                          zoom: 9.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+                ),
+                _buildPrelimTile(
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                           Tooltip(message: "This shows your devices report data",
+                             child: Text(theDeviceData.TempList[5][16]['value'].toString(),
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 24.0)),
+                           ),
+                          Material(
+                              //color: Colors.teal,
+                             // shape: CircleBorder(),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: SignalStrengthIndicator.bars(
+                                    value: -79,
+                                    minValue: -80,
+                                    maxValue: 0,
+                                    levels: <num, Color>{
+                                      25: Colors.red,
+                                      50: Colors.yellow,
+                                      75: Colors.green,
+                                    },
+                                    size: 50,
+                                    barCount: 5,
+                                    spacing: 0.2,
+                                    activeColor: Colors.lightBlue,
+                                    ),
+                              )),
+                        //  Padding(padding: EdgeInsets.only(bottom: 16.0)),
+                          Text(theDeviceData.signalStrength.abs().toString(), style: TextStyle(color: Colors.black45)),
+                        ]),
+                  ),
+                ),
+                _buildPrelimTile(
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Material(
+                              color: Colors.amber,
+                              shape: CircleBorder(),
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Icon(Icons.notifications,
+                                    color: Colors.white, size: 30.0),
+                              )),
+                          Padding(padding: EdgeInsets.only(bottom: 16.0)),
+                          Text('Alerts',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 24.0)),
+                          Text('All ', style: TextStyle(color: Colors.black45)),
+                        ]),
+                  ),
+                ),
+                
+             // CustomDataTab(theDeviceData.DatapointList[0]['type'].toString(), theDeviceData.DatapointList[0]['unit'].toString(), theDeviceData.DatapointList[0]['value'].round().toString(), theDeviceData.DatapointList[0]['timestamp'], returnSparkChart(0, theDeviceData),3, returnGraph(0, theDeviceData)),
+               // testWidget(theDeviceData.DatapointList[1]['type'].toString(), theDeviceData.DatapointList[1]['unit'].toString(), theDeviceData.DatapointList[1]['value'].round().toString(), theDeviceData.DatapointList[1]['timestamp'], Humiditydata,4, returnGraph(0, theDeviceData)),
+              //  testWidget2(theDeviceData.DatapointList[3]['type'].toString(), theDeviceData.DatapointList[3]['unit'].toString(), theDeviceData.DatapointList[3]['value'].round().toString(), theDeviceData.DatapointList[3]['timestamp'], iaqdata,4),
+              /* _buildDataTab(theDeviceData.DatapointList[1]['type'].toString(), theDeviceData.DatapointList[1]['unit'].toString(), theDeviceData.DatapointList[1]['value'].toString(), theDeviceData.DatapointList[1]['timestamp'].toString()),
+               _buildDataTab(theDeviceData.DatapointList[2]['type'].toString(), theDeviceData.DatapointList[2]['unit'].toString(), theDeviceData.DatapointList[2]['value'].toString(), theDeviceData.DatapointList[2]['timestamp'].toString()),
+               _buildDataTab(theDeviceData.DatapointList[3]['type'].toString(), theDeviceData.DatapointList[3]['unit'].toString(), theDeviceData.DatapointList[3]['value'].toString(), theDeviceData.DatapointList[3]['timestamp'].toString()),
+                _buildDataTab(theDeviceData.DatapointList[4]['type'].toString(), theDeviceData.DatapointList[4]['unit'].toString(), theDeviceData.DatapointList[4]['value'].toString(), theDeviceData.DatapointList[4]['timestamp'].toString()),
+              Visibility(child:_buildDataTab(theDeviceData.DatapointList[5]['type'].toString(), theDeviceData.DatapointList[5]['unit'].toString(), theDeviceData.DatapointList[5]['value'].toString(), theDeviceData.DatapointList[5]['timestamp'].toString())
+               , visible: false,) */
+               for (var i = 0; i < 5; i++) CustomDataTab(theDeviceData.DatapointList[i]['type'].toString(), theDeviceData.DatapointList[i]['unit'].toString(), theDeviceData.DatapointList[i]['value'].round().toString(), theDeviceData.DatapointList[i]['timestamp'], returnSparkChart(i, theDeviceData),startingTileIndex + i, returnGraph(i, theDeviceData)),
+
+              ],
+              staggeredTiles: [
+                StaggeredTile.extent(2, tilesize[0]),
+                StaggeredTile.extent(1, tilesize[1]),
+                StaggeredTile.extent(1, tilesize[2]),
+                
+                StaggeredTile.extent(2,tilesize[3]),
+                StaggeredTile.extent(2,tilesize[4]),
+                StaggeredTile.extent(2,tilesize[5]),
+                StaggeredTile.extent(2,tilesize[6]),
+                StaggeredTile.extent(2,tilesize[7]),
+                StaggeredTile.extent(2,tilesize[8]),
+              ],
+            );
+         }
+          }
+        ));
+  }
+}
+
+class _SalesData {
+  _SalesData(this.year, this.sales);
+
+  final String year;
+  final double sales;
+}
+
+class _DataPoints{
+  _DataPoints(this.time, this.value);
+  final String time;
+  final double value;
 }
