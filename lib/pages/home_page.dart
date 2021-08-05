@@ -386,9 +386,13 @@ void _selectFrequencyProfilePage(BuildContext context) {
       context, MaterialPageRoute(builder: (context) => FrequencyProfilePage()));
 }
 
-void _setSensorProfilePage(BuildContext context) {
+void _setSensorProfilePage(BuildContext context, String imei) {
   Navigator.push(
-      context, MaterialPageRoute(builder: (context) => SensorProfilePage()));
+      context,
+      MaterialPageRoute(
+          builder: (context) => SensorProfilePage(
+                imei: imei,
+              )));
 }
 
 class MupDeviceCard extends StatelessWidget {
@@ -469,7 +473,7 @@ class MupDeviceCard extends StatelessWidget {
                 if (choice == 'Frequency Profile') {
                   _selectFrequencyProfilePage(context);
                 } else if (choice == 'Sensor Profile') {
-                  _setSensorProfilePage(context);
+                  _setSensorProfilePage(context, this.device.imei);
                 }
               },
               itemBuilder: (BuildContext context) {
