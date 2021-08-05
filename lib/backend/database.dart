@@ -45,14 +45,50 @@ return retVal;
 
 Stream<DeviceData> myDevice(String imei, String uid) {
     Stream<DocumentSnapshot> octaveData = databaseReference.collection('devices').doc(imei).snapshots();
+    /*Stream<QuerySnapshot> locationdata = databaseReference.collection('mangoh_resources')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'location')
+    .orderBy("timestamp", descending: true)
+    .limit(1)
+    .snapshots();*/
     Stream<QuerySnapshot> tempdata = databaseReference.collection('datapoints')
     .where("imei", isEqualTo: int.parse(imei))
     .where('type', isEqualTo: 'temperature')
     .orderBy("timestamp", descending: true)
     .limit(1)
     .snapshots();
+    Stream<QuerySnapshot> humidity = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'humidity')
+    .orderBy("timestamp", descending: true)
+    .limit(1)
+    .snapshots();
+    Stream<QuerySnapshot> pressure = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'pressure')
+    .orderBy("timestamp", descending: true)
+    .limit(1)
+    .snapshots();
+    Stream<QuerySnapshot> iaq = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'iaq')
+    .orderBy("timestamp", descending: true)
+    .limit(1)
+    .snapshots();
+    Stream<QuerySnapshot> breath_voc = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'breath_voc')
+    .orderBy("timestamp", descending: true)
+    .limit(1)
+    .snapshots();
+    Stream<QuerySnapshot> co2e = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'co2e')
+    .orderBy("timestamp", descending: true)
+    .limit(1)
+    .snapshots();
 
-    return CombineLatestStream([octaveData,tempdata], (values) => values.toList()).asBroadcastStream().map((snapshot) => DeviceData.fromFirebase(doc: snapshot));
+    return CombineLatestStream([octaveData,tempdata,humidity,pressure,iaq,breath_voc,co2e], (values) => values.toList()).asBroadcastStream().map((snapshot) => DeviceData.fromFirebase(doc: snapshot));
   }
 
 
