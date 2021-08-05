@@ -143,6 +143,12 @@ class _DashboardState extends State<Dashboard> {
     Response response = await Octave.deleteDevice(
         deletedDeviceName, deletedDeviceImei, _currentUser.email);
 
+    // Delete sensor profile for device
+    databaseReference
+        .collection('sensorProfile')
+        .doc(deletedDeviceImei)
+        .delete();
+
     print('delete response = ' + response.body.toString());
 
     if (response.statusCode == 200) {
