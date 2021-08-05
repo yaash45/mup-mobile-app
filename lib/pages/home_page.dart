@@ -149,6 +149,12 @@ class _DashboardState extends State<Dashboard> {
         .doc(deletedDeviceImei)
         .delete();
 
+    // Delete frequency profile for device
+    databaseReference
+        .collection('frequencyProfile')
+        .doc(deletedDeviceImei)
+        .delete();
+
     print('delete response = ' + response.body.toString());
 
     if (response.statusCode == 200) {
@@ -387,9 +393,13 @@ void _deviceInfoPage(BuildContext context, String imei) {
               )));
 }
 
-void _selectFrequencyProfilePage(BuildContext context) {
+void _selectFrequencyProfilePage(BuildContext context, String imei) {
   Navigator.push(
-      context, MaterialPageRoute(builder: (context) => FrequencyProfilePage()));
+      context,
+      MaterialPageRoute(
+          builder: (context) => FrequencyProfilePage(
+                imei: imei,
+              )));
 }
 
 void _setSensorProfilePage(BuildContext context, String imei) {
@@ -477,7 +487,7 @@ class MupDeviceCard extends StatelessWidget {
               ),
               onSelected: (choice) {
                 if (choice == 'Frequency Profile') {
-                  _selectFrequencyProfilePage(context);
+                  _selectFrequencyProfilePage(context, this.device.imei);
                 } else if (choice == 'Sensor Profile') {
                   _setSensorProfilePage(context, this.device.imei);
                 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mup_app/models/DeviceData.dart';
+import 'package:mup_app/models/FrequencyProfile.dart';
 import 'package:mup_app/models/SensorProfile.dart';
 import 'package:mup_app/models/UserModel.dart';
 import 'package:rxdart/rxdart.dart';
@@ -79,5 +80,13 @@ class OurDatabase {
         .collection('sensorProfile')
         .doc(imei)
         .set(updatedSensorProfile);
+  }
+
+  Stream<FrequencyProfile> getFrequencyProfile(String imei) {
+    Stream<DocumentSnapshot> frequencyProfile =
+        databaseReference.collection('frequencyProfile').doc(imei).snapshots();
+
+    return frequencyProfile
+        .map((snapshot) => FrequencyProfile.fromJson(snapshot.data()));
   }
 }
