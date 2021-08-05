@@ -87,11 +87,6 @@ class SensorProfile {
     this.getAllSensorProfileItemsAsList()[index].setSensor(status);
   }
 
-  void pushSensorProfileToFirebase(String imei) {
-    // TODO: Implement pushing to sensorProfile collection on firebase
-    print(this);
-  }
-
   @override
   String toString() {
     String result = "";

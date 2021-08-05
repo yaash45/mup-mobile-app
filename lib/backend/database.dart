@@ -64,4 +64,20 @@ class OurDatabase {
     return sensorProfile
         .map((snapshot) => SensorProfile.fromJson(snapshot.data()));
   }
+
+  Future<void> pushSensorProfileToFirestore(
+      SensorProfile profile, String imei) {
+    var updatedSensorProfile = Map<String, dynamic>();
+    updatedSensorProfile['temperature'] = profile.temperature.sensorOn;
+    updatedSensorProfile['pressure'] = profile.pressure.sensorOn;
+    updatedSensorProfile['humidity'] = profile.humidity.sensorOn;
+    updatedSensorProfile['co2Equivalent'] = profile.co2Equivalent.sensorOn;
+    updatedSensorProfile['breathVoc'] = profile.breathVoc.sensorOn;
+    updatedSensorProfile['iaq'] = profile.iaq.sensorOn;
+
+    return databaseReference
+        .collection('sensorProfile')
+        .doc(imei)
+        .set(updatedSensorProfile);
+  }
 }

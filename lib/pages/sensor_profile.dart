@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:customtogglebuttons/customtogglebuttons.dart';
-import 'package:mup_app/backend/Octave.dart';
 import 'package:mup_app/backend/database.dart';
 import 'package:mup_app/models/SensorProfile.dart';
 import 'package:mup_app/templates/appbar.dart';
@@ -23,9 +22,10 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
   SensorProfile _profile;
   List<bool> _selections;
 
-  void _saveProfile() {
-    _profile.pushSensorProfileToFirebase(imei);
-    _showToast(context);
+  OurDatabase _db = new OurDatabase();
+
+  void _done() {
+    _db.pushSensorProfileToFirestore(_profile, imei);
     Navigator.pop(context);
   }
 
@@ -48,7 +48,7 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
         leadingBackButton: true,
       ),
       body: StreamBuilder<SensorProfile>(
-          stream: new OurDatabase().getSensorProfile(imei),
+          stream: _db.getSensorProfile(imei),
           builder: (context, snapshot) {
             if (snapshot.data == null) {
               return CircularProgressIndicator();
@@ -99,9 +99,9 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
                         isSelected: _selections,
                         onPressed: (int index) {
                           setState(() {
-                            _selections[index] = !_selections[index];
                             _profile.setSensorByIndex(
-                                index, _selections[index]);
+                                index, !_selections[index]);
+                            _db.pushSensorProfileToFirestore(_profile, imei);
                           });
                         },
                       ),
@@ -110,8 +110,8 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
                       flex: 6,
                     ),
                     ElevatedButton(
-                      child: Text('Save profile'),
-                      onPressed: _saveProfile,
+                      child: Text('Done'),
+                      onPressed: _done,
                     ),
                     Spacer(
                       flex: 1,
