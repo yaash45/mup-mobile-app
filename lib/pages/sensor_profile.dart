@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:customtogglebuttons/customtogglebuttons.dart';
+import 'package:mup_app/models/SensorProfile.dart';
 import 'package:mup_app/templates/appbar.dart';
 
-const int NumSensors = 5;
+const int NumSensors = 6;
 
 class SensorProfilePage extends StatefulWidget {
-  SensorProfilePage({Key key}) : super(key: key);
+  SensorProfilePage({Key key, this.imei}) : super(key: key);
+
+  final String imei;
 
   @override
-  _SensorProfilePageState createState() => _SensorProfilePageState();
+  _SensorProfilePageState createState() => _SensorProfilePageState(this.imei);
 }
 
 class _SensorProfilePageState extends State<SensorProfilePage> {
-  List<bool> _selections = List<bool>.generate(NumSensors, (index) => false);
-  bool _atLeastOneSensor = false;
+  final String imei;
+  _SensorProfilePageState(this.imei);
+
+  SensorProfile _profile = new SensorProfile();
+  List<bool> _selections = List<bool>.generate(NumSensors, (index) => true);
 
   void _saveProfile() {
-    for (var i = 0; i < _selections.length; i++) {
-      if (_selections[i]) {
-        _atLeastOneSensor = true;
-      }
-    }
-    if (_atLeastOneSensor) {
-      _showToast(context);
-      Navigator.pop(context);
-    }
+    _profile.pushSensorProfileToFirebase(imei);
+    _showToast(context);
+    Navigator.pop(context);
   }
 
   void _showToast(BuildContext context) {
@@ -36,18 +36,6 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
             label: 'OK', onPressed: scaffold.hideCurrentSnackBar),
       ),
     );
-  }
-
-  void _disableVisionProcessor() {
-    _selections[1] = false;
-  }
-
-  void _disableHumiditySensor() {
-    _selections[2] = false;
-  }
-
-  void _disableLowPowerMode() {
-    _selections[4] = false;
   }
 
   @override
@@ -82,58 +70,21 @@ class _SensorProfilePageState extends State<SensorProfilePage> {
                   runSpacing: 10.0,
                   constraints: BoxConstraints(minWidth: 170),
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      width: 100,
-                      child: Column(children: [
-                        Icon(Icons.thermostat_sharp),
-                        Text('Temperature'),
-                      ]),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      width: 100,
-                      child: Column(children: [
-                        Icon(Icons.visibility),
-                        Text('Vision'),
-                      ]),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      width: 100,
-                      child: Column(children: [
-                        Icon(Icons.water_damage_outlined),
-                        Text('Humidity'),
-                      ]),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      width: 100,
-                      child: Column(children: [
-                        Icon(Icons.waves),
-                        Text('Vibration'),
-                      ]),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(5.0),
-                      width: 100,
-                      child: Column(children: [
-                        Icon(Icons.power),
-                        Text('Power Saver'),
-                      ]),
-                    ),
+                    for (var i in _profile.getAllSensorProfileItemsAsList())
+                      Container(
+                        padding: EdgeInsets.all(5.0),
+                        width: 100,
+                        child: Column(children: [
+                          i.icon,
+                          Text(i.sensorName),
+                        ]),
+                      ),
                   ],
                   isSelected: _selections,
                   onPressed: (int index) {
                     setState(() {
-                      // TODO: Figure out what sensors to select based on profile
                       _selections[index] = !_selections[index];
-                      if (index == 4) {
-                        _disableVisionProcessor(); //Turn off camera
-                        _disableHumiditySensor(); //Turn off humidity
-                      } else {
-                        _disableLowPowerMode();
-                      }
+                      _profile.setSensorByIndex(index, _selections[index]);
                     });
                   },
                 ),
