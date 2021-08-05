@@ -133,6 +133,16 @@ class _AddNewDevicePageState extends State {
             .doc(uid)
             .update({'Devices': FieldValue.arrayUnion(DevicesList)});
 
+        //Create default sensor profile for user
+        databaseReference.collection('sensorProfile').doc(imei.toString()).set({
+          'temperature': true,
+          'pressure': true,
+          'humidity': true,
+          'co2Equivalent': true,
+          'breathVoc': true,
+          'iaq': true,
+        });
+
         _completeLoad();
 
         clearTextInput();
