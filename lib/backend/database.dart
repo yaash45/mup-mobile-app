@@ -89,4 +89,16 @@ class OurDatabase {
     return frequencyProfile
         .map((snapshot) => FrequencyProfile.fromJson(snapshot.data()));
   }
+
+  Future<void> pushFrequencyProfileToFirestore(
+      FrequencyProfile profile, String imei) {
+    var updatedFrequencyProfile = Map<String, dynamic>();
+    updatedFrequencyProfile['messagesPerHour'] = profile.messagesPerHour;
+    updatedFrequencyProfile['preset'] = profile.preset;
+
+    return databaseReference
+        .collection('frequencyProfile')
+        .doc(imei)
+        .set(updatedFrequencyProfile);
+  }
 }

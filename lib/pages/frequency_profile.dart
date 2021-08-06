@@ -39,7 +39,11 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
 
   void _setValue(String customValue) {
     _messageFrequency = int.parse(customValue);
-    setState(() {});
+    setState(() {
+      _profile.messagesPerHour = _messageFrequency;
+      _profile.preset = 'custom';
+      _db.pushFrequencyProfileToFirestore(_profile, imei);
+    });
   }
 
   void clearTextInput() {
@@ -69,7 +73,7 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
     return Scaffold(
         appBar: MupAppBar(
           'Frequency Profile',
-          leadingBackButton: true,
+          leadingBackButton: false,
         ),
         body: StreamBuilder<FrequencyProfile>(
             stream: _db.getFrequencyProfile(imei),
@@ -78,7 +82,22 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
                 return CircularProgressIndicator();
               } else {
                 _profile = snapshot.data;
-                print(_profile);
+
+                if (_profile.preset == 'custom') {
+                  _value = CustomFrequencyProfileValue;
+                  _custom = true;
+                } else if (_profile.preset == 'high') {
+                  _value = HighFrequencyProfileValue;
+                  _custom = false;
+                } else if (_profile.preset == 'medium') {
+                  _value = MediumFrequencyProfileValue;
+                  _custom = false;
+                } else if (_profile.preset == 'low') {
+                  _value = LowFrequencyProfileValue;
+                  _custom = false;
+                }
+
+                _messageFrequency = _profile.messagesPerHour;
 
                 return Container(
                   padding: EdgeInsets.all(20.0),
@@ -120,7 +139,26 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
 
                                     if (!_custom) {
                                       _messageFrequency = _value;
+                                      _profile.messagesPerHour =
+                                          _messageFrequency;
+
+                                      if (_value == HighFrequencyProfileValue) {
+                                        _profile.preset = 'high';
+                                      } else if (_value ==
+                                          MediumFrequencyProfileValue) {
+                                        _profile.preset = 'medium';
+                                      } else if (_value ==
+                                          LowFrequencyProfileValue) {
+                                        _profile.preset = 'low';
+                                      } else {
+                                        _profile.preset = 'custom';
+                                      }
+                                    } else {
+                                      _profile.preset = 'custom';
                                     }
+
+                                    _db.pushFrequencyProfileToFirestore(
+                                        _profile, imei);
                                   });
                                 },
                               ),
@@ -165,8 +203,7 @@ class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
                             ],
                           )),
                       ElevatedButton(
-                          onPressed: _setFrequencyProfile,
-                          child: Text('Set Profile'))
+                          onPressed: _setFrequencyProfile, child: Text('Done'))
                     ],
                   ),
                 );

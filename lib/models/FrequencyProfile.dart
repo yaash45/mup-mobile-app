@@ -5,7 +5,7 @@ class FrequencyProfile {
   FrequencyProfile({this.messagesPerHour, this.preset});
 
   FrequencyProfile.fromJson(Map<String, dynamic> parsedJson)
-      : messagesPerHour = 60 ~/ parsedJson['period'],
+      : messagesPerHour = parsedJson['messagesPerHour'],
         preset = parsedJson['preset'];
 
   setFrequencyValue(int messagesPerHour, String preset) {
