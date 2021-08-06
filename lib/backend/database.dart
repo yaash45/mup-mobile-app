@@ -95,6 +95,7 @@ class OurDatabase {
     var updatedFrequencyProfile = Map<String, dynamic>();
     updatedFrequencyProfile['messagesPerHour'] = profile.messagesPerHour;
     updatedFrequencyProfile['preset'] = profile.preset;
+    updatedFrequencyProfile['deviceName'] = profile.deviceName;
 
     return databaseReference
         .collection('frequencyProfile')

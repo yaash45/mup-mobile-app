@@ -4,12 +4,14 @@ import 'package:mup_app/models/FrequencyProfile.dart';
 import 'package:mup_app/templates/appbar.dart';
 
 class FrequencyProfilePage extends StatefulWidget {
-  FrequencyProfilePage({Key key, this.imei}) : super(key: key);
+  FrequencyProfilePage({Key key, this.imei, this.deviceName}) : super(key: key);
 
   final String imei;
+  final String deviceName;
 
   @override
-  _FrequencyProfilePageState createState() => _FrequencyProfilePageState(imei);
+  _FrequencyProfilePageState createState() =>
+      _FrequencyProfilePageState(imei, deviceName);
 }
 
 const int HighFrequencyProfileValue = 60;
@@ -25,7 +27,8 @@ const double PricePerMessageInDollars = 0.50;
 
 class _FrequencyProfilePageState extends State<FrequencyProfilePage> {
   final String imei;
-  _FrequencyProfilePageState(this.imei);
+  final String deviceName;
+  _FrequencyProfilePageState(this.imei, this.deviceName);
 
   OurDatabase _db = new OurDatabase();
   FrequencyProfile _profile;

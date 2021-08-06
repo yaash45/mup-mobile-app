@@ -147,7 +147,8 @@ class _AddNewDevicePageState extends State {
             .collection('frequencyProfile')
             .doc(imei.toString())
             .set({
-          'period': 60,
+          'deviceName': _name,
+          'messagesPerHour': 60,
           'preset': 'high',
         });
 
