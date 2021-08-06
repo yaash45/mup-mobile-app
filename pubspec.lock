@@ -8,6 +8,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.5.0"
+  badges:
+    dependency: "direct main"
+    description:
+      name: badges
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -191,6 +198,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  get_time_ago:
+    dependency: "direct main"
+    description:
+      name: get_time_ago
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.3"
   google_maps_flutter:
     dependency: "direct main"
     description:

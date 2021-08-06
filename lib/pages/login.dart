@@ -73,7 +73,7 @@ class _LoginState extends State<Login> {
             margin: EdgeInsets.only(top: 20),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50),
-                color: MupColors.appSwatch.shade100),
+                color: Color(0xff154d9e)),
             child: Center(
                 child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

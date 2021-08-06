@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 //import 'dart:html';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,8 +19,10 @@ import 'package:intl/intl.dart';
 import 'package:signal_strength_indicator/signal_strength_indicator.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
+import 'package:get_time_ago/get_time_ago.dart';
+import 'package:badges/badges.dart';
 
-Map<String, String> SensorNames = {'iaq': 'Indoor Air Quality', 'co2e': 'Carbon Dioxide Equivalent', 'breath_voc': 'Breath VOC',
+Map<String, String> SensorNames = {'iaq': 'IndoorAirQuality', 'co2e': 'Co2 Equivalent', 'breath_voc': 'Breath VOC',
 'temperature' : 'Temperature', 'pressure' : 'Pressure', 
 'humidity' : "Humidity"
 };
@@ -33,6 +36,10 @@ Map<String, IconData> IconValues = {
 'temperature' : Icons.thermostat_outlined
 };
 
+Map<bool, IconData> BatteryConnected = {
+  true: Icons.battery_charging_full_rounded,
+  false: Icons.battery_unknown_outlined,
+};
 class DeviceInfo extends StatefulWidget {
   final String deviceImei;
 
@@ -409,8 +416,7 @@ return   _buildTile(
             );
     ////      
 }
-Widget testWidget(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph)
-{
+Widget testWidget(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph){
   return _buildTile(
               indexnum,
               Padding(
@@ -528,7 +534,7 @@ Widget testWidget2(String type, String unit, String value, int date, List<double
                           ),
                           SizedBox(
                             height: 30,
-                            width: 120,
+                            width: 110,
                             child: Sparkline(
                         data: charts,
                         lineWidth: 3.0,
@@ -539,7 +545,7 @@ Widget testWidget2(String type, String unit, String value, int date, List<double
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 25.0)), 
+                                      fontSize: 20.0)), 
                         ],
                       ),
                      // Padding(padding: EdgeInsets.only(bottom: 0, top: 3.0)),
@@ -639,13 +645,13 @@ Widget CustomDataTab(String type, String unit, String value, int date, List<doub
 String returnDate(int timestamp){
 var dt = DateTime.fromMillisecondsSinceEpoch(timestamp);
 // 12 Hour format:
-var d12 = DateFormat('hh:mm a').format(dt); // 12/31/2000, 10:00 PM
+var d12 = DateFormat('MM-dd-yyyy hh:mm a').format(dt); // 12/31/2000, 10:00 PM
 return d12;
 }
 List<double> returnSparkChart(int index, DeviceData theDeviceData){
   List<double> data = [];
   theDeviceData.TempList[index].forEach((element) {
-        data.add(element['value']);
+        data.add(element['value'].toDouble());
        }); 
   return data;
 }
@@ -654,7 +660,7 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
   theDeviceData.TempList[index].forEach((element) {
         data.add(_DataPoints(returnDate(element['timestamp']), element[
                 'value'
-              ]));
+              ].toDouble()));
        }); 
   return data;
 }
@@ -696,12 +702,10 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
              theDeviceData.TempList[2].forEach((element) {
               iaqdata.add(element['value']);
             }); 
-            double num1 = theDeviceData.TempList[5][0]['value'].toDouble();
-            print(num1);
-            print(theDeviceData.TempList[5][0]['value'].runtimeType);
-           //  print(theDeviceData.TempList[5][0]['value'].runtimeType);
-            // theDeviceData.TempList[0][1]['value'].toString()
-          //  print(theDeviceData.TempList[0].value);
+           // double num1 = theDeviceData.TempList[5][0]['value'].toDouble();
+            //print(num1);
+           // print(theDeviceData.TempList[5][0]['value'].runtimeType);
+          
           return StaggeredGridView.count(
               crossAxisCount: 2,
               crossAxisSpacing: 12.0,
@@ -736,68 +740,131 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                 ),
                 _buildPrelimTile(
                   Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.all(10.0),
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                           Tooltip(message: "This shows your devices report data",
-                             child: Text(theDeviceData.TempList[5][16]['value'].toString(),
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 24.0)),
-                           ),
-                          Material(
-                              //color: Colors.teal,
-                             // shape: CircleBorder(),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: SignalStrengthIndicator.bars(
-                                    value: -79,
-                                    minValue: -80,
-                                    maxValue: 0,
-                                    levels: <num, Color>{
-                                      25: Colors.red,
-                                      50: Colors.yellow,
-                                      75: Colors.green,
-                                    },
-                                    size: 50,
-                                    barCount: 5,
-                                    spacing: 0.2,
-                                    activeColor: Colors.lightBlue,
+                            Row(
+                              
+                               children: [
+                                 Tooltip(message:"This shows your report data",
+                                   child: Text("Report",
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 20.0)),
+                                 ),
+                               VerticalDivider(width:35),
+                                Material(
+                                  child: 
+                                  Row(
+                                    children: [
+                                          SignalStrengthIndicator.bars(
+                                        value: -61,
+                                        minValue: -110,
+                                        maxValue: 0,
+                                        levels: <num, Color>{
+                                          -60: Colors.red,
+                                          50: Colors.yellow,
+                                          75: Colors.green,
+                                        },
+                                        size: 20,
+                                        barCount: 5,
+                                        spacing: 0.2,
+                                        activeColor: Colors.lightBlue,
+                                        ),     
+                                Text(theDeviceData.signalratvalue.toString().toUpperCase(), style: TextStyle(color: Colors.black45, fontSize: 15.0)),
+                                Tooltip(message: "Notifies power status of your device",
+                                  child: Transform.rotate(
+                                  angle: 1.57,
+                                  child:
+                                     Icon(
+                                    BatteryConnected[theDeviceData.battery],
+                                      size: 20,
                                     ),
-                              )),
+                                    ),
+                                ),
+                                    ],
+                                  )
+                                )
+                               ],
+                             
+                           ),
+                         //provisioning, name, time last seen, synced
+                          Divider(),
+                          Row(children: [
+                                 Text("Name ", style: TextStyle(fontWeight: FontWeight.w500)),
+                                 Text(theDeviceData.name.toString(), style: TextStyle(color: Colors.black45)),
+                              ],
+                           ),
+                          Divider(),
+                          Row(children: [
+                                 Text("Status ", style: TextStyle(fontWeight: FontWeight.w500)),
+                                 Text(theDeviceData.provisioningStatus.toString().toLowerCase(), style: TextStyle(color: Colors.black45)),
+                              ],
+                           ), 
+                          Divider(),
+                          Row(children: [
+                                 Text("Synced ", style: TextStyle(fontWeight: FontWeight.w500)),
+                                 Text(theDeviceData.synced.toString().toLowerCase(), style: TextStyle(color: Colors.black45)),
+                              ],
+                           ), 
+                          Divider(),
+                          Row(
+                          children :[
+                          Text("Last Seen ", style: TextStyle(fontWeight: FontWeight.w500)),
+                          Text(GetTimeAgo.parse(DateTime.now().subtract(Duration(milliseconds: theDeviceData.timeSinceLastSeen))),
+                          softWrap: false,
+                          overflow: TextOverflow.clip,
+                           style: TextStyle(color: Colors.black45, fontSize:12 )),
+                          ]
+                          ),
+                          
+                              
+                          
+                           
+                          
                         //  Padding(padding: EdgeInsets.only(bottom: 16.0)),
-                          Text(theDeviceData.signalStrength.abs().toString(), style: TextStyle(color: Colors.black45)),
+                        //  Text(theDeviceData.signalStrength.abs().toString(), style: TextStyle(fontWeight: FontWeight.w500)),
                         ]),
                   ),
                 ),
-                _buildPrelimTile(
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Material(
-                              color: Colors.amber,
-                              shape: CircleBorder(),
-                              child: Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Icon(Icons.notifications,
-                                    color: Colors.white, size: 30.0),
-                              )),
-                          Padding(padding: EdgeInsets.only(bottom: 16.0)),
-                          Text('Alerts',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 24.0)),
-                          Text('All ', style: TextStyle(color: Colors.black45)),
-                        ]),
+               _buildPrelimTile(
+                    Padding(
+                      padding: const EdgeInsets.all(0),
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                          Badge(
+                            
+                            showBadge: true,
+                            badgeContent:  Text("1", style: TextStyle(fontSize: 20,
+                            color: Colors.white,
+                            )),
+                              child:
+                             Material(
+                                  color: Colors.amber,
+                                  shape: CircleBorder(),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Icon(Icons.notifications,
+                                        color: Colors.white, size: 30.0),
+                                  )),
+                          ),
+                            Padding(padding: EdgeInsets.only(bottom: 16.0)),
+                             Text('Alerts',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 20.0)),
+                            
+                           // Text('All ', style: TextStyle(color: Colors.black45)),
+                          ]),
+                    ),
                   ),
-                ),
+                
                 
              // CustomDataTab(theDeviceData.DatapointList[0]['type'].toString(), theDeviceData.DatapointList[0]['unit'].toString(), theDeviceData.DatapointList[0]['value'].round().toString(), theDeviceData.DatapointList[0]['timestamp'], returnSparkChart(0, theDeviceData),3, returnGraph(0, theDeviceData)),
                // testWidget(theDeviceData.DatapointList[1]['type'].toString(), theDeviceData.DatapointList[1]['unit'].toString(), theDeviceData.DatapointList[1]['value'].round().toString(), theDeviceData.DatapointList[1]['timestamp'], Humiditydata,4, returnGraph(0, theDeviceData)),
@@ -808,7 +875,7 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                 _buildDataTab(theDeviceData.DatapointList[4]['type'].toString(), theDeviceData.DatapointList[4]['unit'].toString(), theDeviceData.DatapointList[4]['value'].toString(), theDeviceData.DatapointList[4]['timestamp'].toString()),
               Visibility(child:_buildDataTab(theDeviceData.DatapointList[5]['type'].toString(), theDeviceData.DatapointList[5]['unit'].toString(), theDeviceData.DatapointList[5]['value'].toString(), theDeviceData.DatapointList[5]['timestamp'].toString())
                , visible: false,) */
-               for (var i = 0; i < 5; i++) CustomDataTab(theDeviceData.DatapointList[i]['type'].toString(), theDeviceData.DatapointList[i]['unit'].toString(), theDeviceData.DatapointList[i]['value'].round().toString(), theDeviceData.DatapointList[i]['timestamp'], returnSparkChart(i, theDeviceData),startingTileIndex + i, returnGraph(i, theDeviceData)),
+               for (var i = 0; i < 6; i++) CustomDataTab(theDeviceData.DatapointList[i]['type'].toString(), theDeviceData.DatapointList[i]['unit'].toString(), theDeviceData.DatapointList[i]['value'].round().toString(), theDeviceData.DatapointList[i]['timestamp'], returnSparkChart(i, theDeviceData),startingTileIndex + i, returnGraph(i, theDeviceData)),
 
               ],
               staggeredTiles: [

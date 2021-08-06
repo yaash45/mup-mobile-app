@@ -12,6 +12,7 @@ class DeviceData {
   String signalratvalue;
   bool synced;
   dynamic test;
+  bool battery;
   List<dynamic> DatapointList;
   double lat;
   double lon;
@@ -33,6 +34,7 @@ class DeviceData {
     this.lon,
     this.signalStrength,
     this.TempList,
+    this.battery,
   });
 
 
@@ -48,6 +50,8 @@ class DeviceData {
     lat: doc[1].docs[0]['lat'],
     lon: doc[1].docs[0]['lon'], 
     signalStrength: doc[0].data()['body']['report']['signal']['strength']['value'],
+    battery: doc[0].data()['body']['report']['battery']['connected']['value'],
+    synced: doc[0].data()['body']['synced'],
 
     test: doc[2].docs[0]['type'],
     DatapointList: [doc[2].docs[0],doc[3].docs[0],doc[4].docs[0],doc[5].docs[0],doc[6].docs[0],
