@@ -220,3 +220,259 @@ async function deleteDeviceFromFirestore(imei, userEmail) {
 }
 
 exports.device = functions.https.onRequest(app);
+
+exports.createAndApplyBlueprint = functions.firestore
+  .document("devices/{imei}")
+  .onCreate(async (snapshot, context) => {
+    var data = snapshot.data();
+
+    try {
+      var newBlueprint = await createBlueprint(data["body"]["name"]);
+      console.log("newBlueprint :>> ", newBlueprint);
+      var applyBlueprintResponse = await applyBlueprint(
+        newBlueprint,
+        data["body"]["id"]
+      );
+      console.log(
+        "applyBlueprintResponse.head.status :>> ",
+        applyBlueprintResponse.head.status
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+function createBlueprint(deviceName) {
+  return new Promise((resolve, reject) => {
+    const createBlueprintOptions = {
+      hostname: "octave-api.sierrawireless.io",
+      path: `/v5.0/capstone_uop2021/blueprint/`,
+      method: "POST",
+      headers: {
+        "X-Auth-Token": functions.config().octave.auth_token,
+        "X-Auth-User": functions.config().octave.auth_user,
+      },
+    };
+
+    var body = {
+      displayName: deviceName,
+      observations: {
+        "/environment/value": {
+          co2_equivalent: {
+            period: 60,
+            select: "co2EquivalentValue",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          iaq: {
+            period: 60,
+            select: "iaqValue",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          temperature: {
+            period: 60,
+            select: "temperature",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          breath_voc: {
+            period: 60,
+            select: "breathVocValue",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          humidity: {
+            period: 60,
+            select: "humidity",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          pressure: {
+            period: 60,
+            select: "pressure",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+        },
+        "/location/coordinates/value": {
+          coordinates: {
+            period: 60,
+            select: null,
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+        },
+        "/orp/asset/vps_shot": {
+          vps_shot: {
+            period: null,
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: 1,
+            buffer: null,
+            lte: null,
+          },
+        },
+      },
+      state: {
+        "/imu/temp/enable": true,
+        "/location/coordinates/period": 10,
+        "/imu/gyro/period": 10,
+        "/io/config": {
+          devs: [
+            {
+              conf: [
+                {
+                  baud: "9600",
+                  routing: "IOT0",
+                  wire: "2",
+                  stop: "1",
+                  own: "orp",
+                  bits: 8,
+                  type: "UART1",
+                  pair: "N",
+                  flow: "N",
+                },
+              ],
+              type: "serial",
+            },
+          ],
+        },
+        "/cloudInterface/developer_mode/close_on_inactivity": true,
+        "/imu/accel/enable": true,
+        "/imu/temp/period": 10,
+        "/imu/gyro/enable": true,
+        "/environment/lowPower": false,
+        "/environment/enable": true,
+        "/location/coordinates/enable": true,
+        "/cloudInterface/developer_mode/enable": true,
+        "/imu/accel/period": 10,
+        "/environment/ambientAirTemp": 25,
+      },
+    };
+
+    var req = https.request(createBlueprintOptions, (res) => {
+      res.setEncoding("utf8");
+      var response = "";
+
+      res.on("data", (d) => {
+        response += d;
+      });
+
+      res.on("end", () => {
+        var jsonResponse = JSON.parse(response);
+
+        if (jsonResponse.head.status === 201) {
+          var result = {
+            id: jsonResponse.body.id,
+            displayName: jsonResponse.body.displayName,
+            version: jsonResponse.body.version,
+          };
+          resolve(result);
+        } else {
+          reject(jsonResponse);
+        }
+      });
+    });
+
+    req.on("error", (err) => {
+      reject(err);
+    });
+
+    req.write(JSON.stringify(body));
+    req.end();
+  });
+}
+
+function applyBlueprint(newBlueprint, deviceId) {
+  return new Promise((resolve, reject) => {
+    const applyBlueprintOptions = {
+      hostname: "octave-api.sierrawireless.io",
+      path: `/v5.0/capstone_uop2021/blueprint/apply`,
+      method: "PUT",
+      headers: {
+        "X-Auth-Token": functions.config().octave.auth_token,
+        "X-Auth-User": functions.config().octave.auth_user,
+      },
+    };
+
+    var body = {
+      blueprint: {
+        id: newBlueprint["id"],
+        version: newBlueprint["version"],
+      },
+      deviceIds: [deviceId],
+    };
+
+    var req = https.request(applyBlueprintOptions, (res) => {
+      res.setEncoding("utf8");
+      var response = "";
+
+      res.on("data", (d) => {
+        response += d;
+      });
+
+      res.on("end", () => {
+        var jsonResponse = JSON.parse(response);
+
+        if (jsonResponse.head.status === 200) {
+          resolve(jsonResponse);
+        } else {
+          reject(jsonResponse);
+        }
+      });
+    });
+
+    req.on("error", (err) => reject(err));
+
+    req.write(JSON.stringify(body));
+    req.end();
+  });
+}
+
+exports.frequencyProfile = functions.firestore
+  .document("frequencyProfile/{imei}")
+  .onUpdate(async (change, context) => {
+    var imei = context.params.imei;
+    var updatedFrequencyProfile = change.after.data();
+
+    var deviceSnapshot = await db.collection("devices").doc(`${imei}`).get();
+
+    if (!deviceSnapshot.exists) {
+      console.log("No such document with imei = ", imei);
+    } else {
+      var deviceData = deviceSnapshot.data();
+      var deviceId = deviceData["body"]["id"];
+      var blueprintId = deviceData["body"]["blueprintId"];
+      //TODO: Update blueprint, and apply to device
+    }
+  });
