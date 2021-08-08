@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:ui';
 //import 'dart:html';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -302,6 +303,7 @@ Set<Marker> _createMarker(double lat , double lon) {
     90.0,
     90.0,
     90.0,
+   
   ];
   List<double> originaltilesizes =[
     220.0,
@@ -313,6 +315,7 @@ Set<Marker> _createMarker(double lat , double lon) {
     90.0,
     90.0,
     90.0,
+    
   ];
 
   Widget tileswitch(int index){
@@ -416,7 +419,44 @@ return   _buildTile(
             );
     ////      
 }
-Widget testWidget(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph){
+
+List<CartesianChartAnnotation> annotations = [
+CartesianChartAnnotation( 
+                        widget: Container(
+                        child: Text("1", style: TextStyle(color: Colors.red)),
+                         // margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle
+                         )),
+                         coordinateUnit: CoordinateUnit.point,
+                        // region: AnnotationRegion.plotArea
+                         x: '08-05-2021 07:00 PM',
+                         y: 24.919
+                         ),
+];
+List<CartesianChartAnnotation> returnAnnotations(int index, DeviceData theDeviceData){
+List<CartesianChartAnnotation> annotations = [];
+ theDeviceData.TempList[index].forEach((element) {
+        if(element['anomaly'] == true) {
+         annotations.add(CartesianChartAnnotation( 
+                        widget: Container(
+                        child: Text("1", style: TextStyle(color: Colors.red)),
+                         // margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle
+                         )),
+                         coordinateUnit: CoordinateUnit.point,
+                        // region: AnnotationRegion.plotArea
+                         x: returnDate(element['timestamp']),
+                         y: element['value'].toDouble()
+                         ));
+        }}); 
+
+return annotations;
+}
+Widget testWidget(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph, DeviceData theDeviceData, int indexfromList){
   return _buildTile(
               indexnum,
               Padding(
@@ -450,11 +490,14 @@ Widget testWidget(String type, String unit, String value, int date, List<double>
                                   ) 
                         ],
                       ),
+                    
+
                       //Padding(padding: EdgeInsets.only(bottom: 10, top: 3.0)),
                       SizedBox(
                         width: 800, height: 300,
-                        child: SfCartesianChart(
-                       
+                        child:
+                       SfCartesianChart(
+                        annotations: returnAnnotations(indexfromList, theDeviceData),
                         
                         primaryXAxis: CategoryAxis(
                           
@@ -467,13 +510,15 @@ Widget testWidget(String type, String unit, String value, int date, List<double>
                         enable: true,
         activationMode: ActivationMode.singleTap,
         lineType: TrackballLineType.vertical,
-        tooltipSettings: const InteractiveTooltip(format: 'point.x : point.y')), 
+        tooltipSettings: const InteractiveTooltip(format: 'point.x : point.y',
+        )), 
                      //tooltipBehavior: TooltipBehavior(enable: true),
-                     
-                        series: <ChartSeries<_DataPoints, String>>[
+                    
+                        series:
+                        <ChartSeries<_DataPoints, String>>[
                         LineSeries<_DataPoints, String>(
                     dataSource: graph,
-                    
+                    emptyPointSettings: EmptyPointSettings(color: Colors.green),
                     xValueMapper: (_DataPoints sales, _) => sales.time,
                     yValueMapper: (_DataPoints sales, _) => sales.value,
                     name: 'Sales',
@@ -485,8 +530,9 @@ Widget testWidget(String type, String unit, String value, int date, List<double>
                     ),
                    
                     )
-              ]),
-                      )
+              ] 
+              ), 
+                      ),
                     ],
                   )),
             );
@@ -636,11 +682,11 @@ Widget testWidget3(String type, String unit, String value, int date, List<double
             );
 }
 
-Widget CustomDataTab(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph){
+Widget CustomDataTab(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph, DeviceData theDeviceData, int indexfromList){
   if(tilesize[indexnum] == originaltilesizes[indexnum]){
     return testWidget2(type, unit, value, date, charts, indexnum);
   }
-  else return testWidget(type, unit, value, date, charts, indexnum, graph);
+  else return testWidget(type, unit, value, date, charts, indexnum, graph, theDeviceData, indexfromList);
 }
 String returnDate(int timestamp){
 var dt = DateTime.fromMillisecondsSinceEpoch(timestamp);
@@ -665,7 +711,7 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
   return data;
 }
 
-
+ var isButtondisabled = true;
   @override
   Widget build(BuildContext context) {
   CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
@@ -761,7 +807,7 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                                   Row(
                                     children: [
                                           SignalStrengthIndicator.bars(
-                                        value: -61,
+                                        value: theDeviceData.signalStrength,
                                         minValue: -110,
                                         maxValue: 0,
                                         levels: <num, Color>{
@@ -848,10 +894,38 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                                   color: Colors.amber,
                                   shape: CircleBorder(),
                                   child: Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Icon(Icons.notifications,
+                                    padding: EdgeInsets.all(10.0),
+                                    child: IconButton(
+                                      
+                                      onPressed:isButtondisabled? null:
+                                      () {
+                                        showDialog(context: context, builder: 
+                                         (BuildContext context) =>  BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+      child:  AlertDialog(
+      title: new Text('Alert Dialog'),
+      content: new Text('Alert Dialog Description'),
+      actions: <Widget>[
+        new TextButton(
+          child: new Text("Continue"),
+           onPressed: () {
+           
+          },
+        ),
+        new TextButton(
+          child: Text("Cancel"),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+      ))
+                                        ); 
+                                        
+                                      },
+                                      icon: Icon(Icons.notifications,
                                         color: Colors.white, size: 30.0),
-                                  )),
+                                  ))),
                           ),
                             Padding(padding: EdgeInsets.only(bottom: 16.0)),
                              Text('Alerts',
@@ -875,8 +949,7 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                 _buildDataTab(theDeviceData.DatapointList[4]['type'].toString(), theDeviceData.DatapointList[4]['unit'].toString(), theDeviceData.DatapointList[4]['value'].toString(), theDeviceData.DatapointList[4]['timestamp'].toString()),
               Visibility(child:_buildDataTab(theDeviceData.DatapointList[5]['type'].toString(), theDeviceData.DatapointList[5]['unit'].toString(), theDeviceData.DatapointList[5]['value'].toString(), theDeviceData.DatapointList[5]['timestamp'].toString())
                , visible: false,) */
-               for (var i = 0; i < 6; i++) CustomDataTab(theDeviceData.DatapointList[i]['type'].toString(), theDeviceData.DatapointList[i]['unit'].toString(), theDeviceData.DatapointList[i]['value'].round().toString(), theDeviceData.DatapointList[i]['timestamp'], returnSparkChart(i, theDeviceData),startingTileIndex + i, returnGraph(i, theDeviceData)),
-
+               for (var i = 0; i < 6; i++) CustomDataTab(theDeviceData.DatapointList[i]['type'].toString(), theDeviceData.DatapointList[i]['unit'].toString(), theDeviceData.DatapointList[i]['value'].round().toString(), theDeviceData.DatapointList[i]['timestamp'], returnSparkChart(i, theDeviceData),startingTileIndex + i, returnGraph(i, theDeviceData), theDeviceData, i),
               ],
               staggeredTiles: [
                 StaggeredTile.extent(2, tilesize[0]),
@@ -889,6 +962,7 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                 StaggeredTile.extent(2,tilesize[6]),
                 StaggeredTile.extent(2,tilesize[7]),
                 StaggeredTile.extent(2,tilesize[8]),
+               
               ],
             );
          }
