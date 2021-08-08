@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -141,6 +140,16 @@ class _AddNewDevicePageState extends State {
           'co2Equivalent': true,
           'breathVoc': true,
           'iaq': true,
+        });
+
+        //Create default frequency profile for user
+        databaseReference
+            .collection('frequencyProfile')
+            .doc(imei.toString())
+            .set({
+          'deviceName': _name,
+          'messagesPerHour': 60,
+          'preset': 'high',
         });
 
         _completeLoad();
