@@ -459,6 +459,57 @@ function applyBlueprint(newBlueprint, deviceId) {
   });
 }
 
+exports.deleteBlueprint = functions.firestore
+  .document("devices/{imei}")
+  .onDelete(async (snapshot, context) => {
+    var deviceData = snapshot.data();
+
+    var deleteBlueprintResponse = await deleteBlueprint(
+      deviceData["body"]["blueprintId"]["id"]
+    );
+
+    console.log(
+      "deleteBlueprintResponse.head.status :>> ",
+      deleteBlueprintResponse.head.status
+    );
+  });
+
+function deleteBlueprint(blueprintId) {
+  return new Promise((resolve, reject) => {
+    const deleteBlueprintOptions = {
+      hostname: "octave-api.sierrawireless.io",
+      path: `/v5.0/capstone_uop2021/blueprint/${blueprintId}`,
+      method: "DELETE",
+      headers: {
+        "X-Auth-Token": functions.config().octave.auth_token,
+        "X-Auth-User": functions.config().octave.auth_user,
+      },
+    };
+
+    var req = https.request(deleteBlueprintOptions, (res) => {
+      res.setEncoding("utf8");
+      var response = "";
+
+      res.on("data", (d) => {
+        response += d;
+      });
+
+      res.on("end", () => {
+        var jsonResult = JSON.parse(response);
+
+        if (jsonResult.head.status === 200) {
+          resolve(jsonResult);
+        } else {
+          reject(jsonResult);
+        }
+      });
+    });
+
+    req.on("error", (err) => reject(err));
+    req.end();
+  });
+}
+
 exports.frequencyProfile = functions.firestore
   .document("frequencyProfile/{imei}")
   .onUpdate(async (change, context) => {
