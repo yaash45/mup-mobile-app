@@ -244,6 +244,7 @@ exports.createAndApplyBlueprint = functions.firestore
 
 function createBlueprint(deviceName) {
   return new Promise((resolve, reject) => {
+    const defaultMessagesPerHour = 60;
     const createBlueprintOptions = {
       hostname: "octave-api.sierrawireless.io",
       path: `/v5.0/capstone_uop2021/blueprint/`,
@@ -254,12 +255,13 @@ function createBlueprint(deviceName) {
       },
     };
 
+    var period = parseInt(`${60 / defaultMessagesPerHour}`, 10);
     var body = {
       displayName: deviceName,
       observations: {
         "/environment/value": {
           co2_equivalent: {
-            period: 60,
+            period: period,
             select: "co2EquivalentValue",
             function: null,
             destination: "cloudInterface",
@@ -269,7 +271,7 @@ function createBlueprint(deviceName) {
             lte: null,
           },
           iaq: {
-            period: 60,
+            period: period,
             select: "iaqValue",
             function: null,
             destination: "cloudInterface",
@@ -279,7 +281,7 @@ function createBlueprint(deviceName) {
             lte: null,
           },
           temperature: {
-            period: 60,
+            period: period,
             select: "temperature",
             function: null,
             destination: "cloudInterface",
@@ -289,7 +291,7 @@ function createBlueprint(deviceName) {
             lte: null,
           },
           breath_voc: {
-            period: 60,
+            period: period,
             select: "breathVocValue",
             function: null,
             destination: "cloudInterface",
@@ -299,7 +301,7 @@ function createBlueprint(deviceName) {
             lte: null,
           },
           humidity: {
-            period: 60,
+            period: period,
             select: "humidity",
             function: null,
             destination: "cloudInterface",
@@ -309,7 +311,7 @@ function createBlueprint(deviceName) {
             lte: null,
           },
           pressure: {
-            period: 60,
+            period: period,
             select: "pressure",
             function: null,
             destination: "cloudInterface",
@@ -321,7 +323,7 @@ function createBlueprint(deviceName) {
         },
         "/location/coordinates/value": {
           coordinates: {
-            period: 60,
+            period: period,
             select: null,
             function: null,
             destination: "cloudInterface",
@@ -522,8 +524,171 @@ exports.frequencyProfile = functions.firestore
       console.log("No such document with imei = ", imei);
     } else {
       var deviceData = deviceSnapshot.data();
+
+      // Update blueprint
+      var blueprintId = deviceData["body"]["blueprintId"]["id"];
+      var newBlueprint = await updateBlueprint(
+        updatedFrequencyProfile["messagesPerHour"],
+        blueprintId
+      );
+      console.log("newBlueprint :>> ", newBlueprint);
+
+      // Apply updated blueprint to device
       var deviceId = deviceData["body"]["id"];
-      var blueprintId = deviceData["body"]["blueprintId"];
-      //TODO: Update blueprint, and apply to device
+      console.log("deviceId :>> ", deviceId);
+      var applyBlueprintResponse = await applyBlueprint(newBlueprint, deviceId);
+      console.log(
+        "applyBlueprintResponse.head.status :>> ",
+        applyBlueprintResponse.head.status
+      );
+
+      if (applyBlueprintResponse.head.status === 200) {
+        // update firestore with new version of blueprint
+        deviceData["body"]["blueprintId"] = {
+          id: newBlueprint["id"],
+          version: newBlueprint["version"],
+        };
+
+        deviceData["body"]["localVersions"]["blueprintId"] = newBlueprint["id"];
+        deviceData["body"]["localVersions"]["blueprintVersion"] =
+          newBlueprint["version"];
+
+        await db.collection("devices").doc(`${imei}`).update(deviceData);
+      }
     }
   });
+
+function updateBlueprint(messagesPerHour, blueprintId) {
+  var period = parseInt(`${60 / messagesPerHour}`, 10);
+  console.log("period :>> ", period);
+
+  return new Promise((resolve, reject) => {
+    const updateBlueprintOptions = {
+      hostname: "octave-api.sierrawireless.io",
+      path: `/v5.0/capstone_uop2021/blueprint/${blueprintId}`,
+      method: "PUT",
+      headers: {
+        "X-Auth-Token": functions.config().octave.auth_token,
+        "X-Auth-User": functions.config().octave.auth_user,
+      },
+    };
+
+    var body = {
+      observations: {
+        "/environment/value": {
+          co2_equivalent: {
+            period: period,
+            select: "co2EquivalentValue",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          iaq: {
+            period: period,
+            select: "iaqValue",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          temperature: {
+            period: period,
+            select: "temperature",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          breath_voc: {
+            period: period,
+            select: "breathVocValue",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          humidity: {
+            period: period,
+            select: "humidity",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+          pressure: {
+            period: period,
+            select: "pressure",
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+        },
+        "/location/coordinates/value": {
+          coordinates: {
+            period: period,
+            select: null,
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: null,
+            buffer: null,
+            lte: null,
+          },
+        },
+        "/orp/asset/vps_shot": {
+          vps_shot: {
+            period: null,
+            function: null,
+            destination: "cloudInterface",
+            gte: null,
+            step: 1,
+            buffer: null,
+            lte: null,
+          },
+        },
+      },
+    };
+
+    var req = https.request(updateBlueprintOptions, (res) => {
+      res.setEncoding("utf8");
+      var response = "";
+
+      res.on("data", (d) => {
+        response += d;
+      });
+
+      res.on("end", () => {
+        var jsonResponse = JSON.parse(response);
+
+        if (jsonResponse.head.status === 200) {
+          var result = {
+            id: jsonResponse.body.id,
+            displayName: jsonResponse.body.displayName,
+            version: jsonResponse.body.version,
+          };
+          resolve(result);
+        } else {
+          reject(jsonResponse);
+        }
+      });
+    });
+
+    req.on("error", (err) => reject(err));
+    req.write(JSON.stringify(body));
+    req.end();
+  });
+}
