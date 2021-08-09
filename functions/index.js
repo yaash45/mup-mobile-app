@@ -692,3 +692,41 @@ function updateBlueprint(messagesPerHour, blueprintId) {
     req.end();
   });
 }
+
+// Test for anomaly detection
+exports.anomalyDetectionTest = functions.firestore
+  .document("/datapoints/{id}")
+  .onCreate(async (snapshot, context) => {
+    var data = snapshot.data();
+    var anomaly = data["anomaly"];
+    var imei = data["imei"];
+    var timestamp = data["timestamp"];
+    var type = data["type"];
+    var unit = data["unit"];
+    var value = data["value"];
+
+    console.log("data :>> ", data);
+    console.log("anomaly :>> ", anomaly);
+    console.log("imei :>> ", imei);
+    console.log("timestamp :>> ", timestamp);
+    console.log("type :>> ", type);
+    console.log("unit :>> ", unit);
+    console.log("value :>> ", value);
+
+    var present = new Date(timestamp);
+    var past = new Date(present);
+    past.setDate(present.getDate() - 1);
+
+    var docs = await db
+      .collection("datapoints")
+      .where("anomaly", "==", false)
+      .where("imei", "==", imei)
+      .where("type", "==", type)
+      .where("timestamp", ">=", past.getUTCMilliseconds())
+      .where("timestamp", "!=", timestamp)
+      .get();
+
+    docs.forEach((result) => {
+      console.log("result.data():>> ", result.data());
+    });
+  });
