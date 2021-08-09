@@ -87,11 +87,11 @@ Stream<DeviceData> myDevice(String imei, String uid) {
     .orderBy("timestamp", descending: true)
     .limit(24)
     .snapshots();
-    
+    Stream<DocumentSnapshot> imagedecoded = databaseReference.collection('alerts').doc('detectedimage').snapshots();
    
     
     return CombineLatestStream([octaveData,locationdata,tempdata,humidity,
-    pressure,iaq,breath_voc,co2e], (values) => values.toList()).asBroadcastStream().map((snapshot) => DeviceData.fromFirebase(doc: snapshot));
+    pressure,iaq,breath_voc,co2e,imagedecoded], (values) => values.toList()).asBroadcastStream().map((snapshot) => DeviceData.fromFirebase(doc: snapshot));
   }
 
 

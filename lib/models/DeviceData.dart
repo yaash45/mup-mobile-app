@@ -18,6 +18,8 @@ class DeviceData {
   double lon;
   dynamic signalStrength;
   List<dynamic> TempList;
+  bool imagedecoded;
+  var testdecodedlist;
 
   
 
@@ -35,6 +37,8 @@ class DeviceData {
     this.signalStrength,
     this.TempList,
     this.battery,
+    this.imagedecoded,
+    this.testdecodedlist
   });
 
 
@@ -52,6 +56,8 @@ class DeviceData {
     signalStrength: doc[0].data()['body']['report']['signal']['strength']['value'],
     battery: doc[0].data()['body']['report']['battery']['connected']['value'],
     synced: doc[0].data()['body']['synced'],
+    imagedecoded: doc[8].data()['decoded'],
+    //testdecodedlist: doc[9].docs,
 
     test: doc[2].docs[0]['type'],
     DatapointList: [doc[2].docs[0],doc[3].docs[0],doc[4].docs[0],doc[5].docs[0],doc[6].docs[0],

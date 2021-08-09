@@ -711,12 +711,12 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
   return data;
 }
 
- var isButtondisabled = true;
+
   @override
   Widget build(BuildContext context) {
   CurrentUser _currentUser = Provider.of<CurrentUser>(context, listen: false);
   var email = _currentUser.getCurrentUser.email.toString();
-
+ 
   //Stream<DeviceData> mydevicedata = OurDatabase().myDevice(deviceImei, 'HEbxCQEvNHYSmwp9orEW2ViWWA13');
     return Scaffold(
         appBar: MupAppBar(
@@ -724,7 +724,7 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
           leadingBackButton: true,
         ),
         body: StreamBuilder<DeviceData>(
-          stream: OurDatabase().myDevice('352653090202201', 'HEbxCQEvNHYSmwp9orEW2ViWWA13'),
+          stream: OurDatabase().myDevice(this.deviceImei, 'HEbxCQEvNHYSmwp9orEW2ViWWA13'),
           builder: (context, snapshot) {
              if(!snapshot.hasData){
            return CircularProgressIndicator(semanticsLabel: "Loading",);
@@ -795,7 +795,7 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                               
                                children: [
                                  Tooltip(message:"This shows your report data",
-                                   child: Text("Report",
+                                   child: Text('Report',
                                       style: TextStyle(
                                           color: Colors.black,
                                           fontWeight: FontWeight.w700,
@@ -885,7 +885,7 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                           children: <Widget>[
                           Badge(
                             
-                            showBadge: true,
+                            showBadge: theDeviceData.imagedecoded,
                             badgeContent:  Text("1", style: TextStyle(fontSize: 20,
                             color: Colors.white,
                             )),
@@ -897,23 +897,25 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                                     padding: EdgeInsets.all(10.0),
                                     child: IconButton(
                                       
-                                      onPressed:isButtondisabled? null:
+                                      onPressed: theDeviceData.imagedecoded?
                                       () {
                                         showDialog(context: context, builder: 
                                          (BuildContext context) =>  BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
       child:  AlertDialog(
-      title: new Text('Alert Dialog'),
-      content: new Text('Alert Dialog Description'),
+      title: new Text('Object Detected'),
+      content: new Image.network(
+      
+      'https://storage.googleapis.com/muop2021/decodedimage1.jpg'),       
       actions: <Widget>[
-        new TextButton(
+       /* new TextButton(
           child: new Text("Continue"),
            onPressed: () {
            
           },
-        ),
+        ),*/
         new TextButton(
-          child: Text("Cancel"),
+          child: Text("OK"),
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -922,7 +924,8 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
       ))
                                         ); 
                                         
-                                      },
+                                      } : null,
+                                      
                                       icon: Icon(Icons.notifications,
                                         color: Colors.white, size: 30.0),
                                   ))),
