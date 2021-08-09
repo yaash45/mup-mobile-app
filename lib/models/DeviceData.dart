@@ -20,6 +20,7 @@ class DeviceData {
   List<dynamic> TempList;
   bool imagedecoded;
   var testdecodedlist;
+  String base64encode;
 
   
 
@@ -38,7 +39,8 @@ class DeviceData {
     this.TempList,
     this.battery,
     this.imagedecoded,
-    this.testdecodedlist
+    this.testdecodedlist,
+    this.base64encode,
   });
 
 
@@ -57,6 +59,7 @@ class DeviceData {
     battery: doc[0].data()['body']['report']['battery']['connected']['value'],
     synced: doc[0].data()['body']['synced'],
     imagedecoded: doc[8].data()['decoded'],
+    base64encode: doc[8].data()['base64encode'],
     //testdecodedlist: doc[9].docs,
 
     test: doc[2].docs[0]['type'],

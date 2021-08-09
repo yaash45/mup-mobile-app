@@ -5,9 +5,17 @@ import 'package:mup_app/models/FrequencyProfile.dart';
 import 'package:mup_app/models/SensorProfile.dart';
 import 'package:mup_app/models/UserModel.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class OurDatabase {
   final databaseReference = FirebaseFirestore.instance;
+
+Future<String> downloadURLExample() async {
+return FirebaseStorage.instance.refFromURL('https://storage.cloud.google.com/capstonemuop.appspot/decodedimage1.jpg').toString();
+   //firebase_storage.ListResult result =
+   //   await firebase_storage.FirebaseStorage.instance.ref().listAll();
+ //return 'https://storage.cloud.google.com/muop2021/decodedimage1.jpg';
+}
 
   Future<String> createUser(UserModel user) async {
     String retVal = 'error';

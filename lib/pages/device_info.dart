@@ -727,7 +727,16 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
           stream: OurDatabase().myDevice(this.deviceImei, 'HEbxCQEvNHYSmwp9orEW2ViWWA13'),
           builder: (context, snapshot) {
              if(!snapshot.hasData){
-           return CircularProgressIndicator(semanticsLabel: "Loading",);
+           return Center(
+             child: Column(
+              children: [
+                Divider(height: 200),
+                CircularProgressIndicator(),
+                Text("Waiting for device to stream data"),
+                Text("This may take awhile..."),
+              ]
+              )
+              );
          }
          else{
            DeviceData theDeviceData = snapshot.data;
@@ -904,9 +913,18 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
       filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
       child:  AlertDialog(
       title: new Text('Object Detected'),
-      content: new Image.network(
-      
-      'https://storage.googleapis.com/muop2021/decodedimage1.jpg'),       
+      content: Image.memory(base64Decode(theDeviceData.base64encode)
+      ),
+      /*FutureBuilder<String>(future: OurDatabase().downloadURLExample(),
+      builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.done) {
+        return Image.network(snapshot.data.toString());
+      }
+      else {
+        return Text("No data");
+      }
+      }
+      ,), */      
       actions: <Widget>[
        /* new TextButton(
           child: new Text("Continue"),
