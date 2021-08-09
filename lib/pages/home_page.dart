@@ -143,6 +143,18 @@ class _DashboardState extends State<Dashboard> {
     Response response = await Octave.deleteDevice(
         deletedDeviceName, deletedDeviceImei, _currentUser.email);
 
+    // Delete sensor profile for device
+    databaseReference
+        .collection('sensorProfile')
+        .doc(deletedDeviceImei)
+        .delete();
+
+    // Delete frequency profile for device
+    databaseReference
+        .collection('frequencyProfile')
+        .doc(deletedDeviceImei)
+        .delete();
+
     print('delete response = ' + response.body.toString());
 
     if (response.statusCode == 200) {
@@ -381,14 +393,24 @@ void _deviceInfoPage(BuildContext context, String imei) {
               )));
 }
 
-void _selectFrequencyProfilePage(BuildContext context) {
+void _selectFrequencyProfilePage(
+    BuildContext context, String imei, String deviceName) {
   Navigator.push(
-      context, MaterialPageRoute(builder: (context) => FrequencyProfilePage()));
+      context,
+      MaterialPageRoute(
+          builder: (context) => FrequencyProfilePage(
+                imei: imei,
+                deviceName: deviceName,
+              )));
 }
 
-void _setSensorProfilePage(BuildContext context) {
+void _setSensorProfilePage(BuildContext context, String imei) {
   Navigator.push(
-      context, MaterialPageRoute(builder: (context) => SensorProfilePage()));
+      context,
+      MaterialPageRoute(
+          builder: (context) => SensorProfilePage(
+                imei: imei,
+              )));
 }
 
 class MupDeviceCard extends StatelessWidget {
@@ -467,9 +489,10 @@ class MupDeviceCard extends StatelessWidget {
               ),
               onSelected: (choice) {
                 if (choice == 'Frequency Profile') {
-                  _selectFrequencyProfilePage(context);
+                  _selectFrequencyProfilePage(
+                      context, this.device.imei, this.device.name);
                 } else if (choice == 'Sensor Profile') {
-                  _setSensorProfilePage(context);
+                  _setSensorProfilePage(context, this.device.imei);
                 }
               },
               itemBuilder: (BuildContext context) {

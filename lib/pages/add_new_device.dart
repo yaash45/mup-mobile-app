@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -132,6 +131,26 @@ class _AddNewDevicePageState extends State {
             .collection('users')
             .doc(uid)
             .update({'Devices': FieldValue.arrayUnion(DevicesList)});
+
+        //Create default sensor profile for user
+        databaseReference.collection('sensorProfile').doc(imei.toString()).set({
+          'temperature': true,
+          'pressure': true,
+          'humidity': true,
+          'co2Equivalent': true,
+          'breathVoc': true,
+          'iaq': true,
+        });
+
+        //Create default frequency profile for user
+        databaseReference
+            .collection('frequencyProfile')
+            .doc(imei.toString())
+            .set({
+          'deviceName': _name,
+          'messagesPerHour': 60,
+          'preset': 'high',
+        });
 
         _completeLoad();
 
