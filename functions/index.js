@@ -255,7 +255,7 @@ function createBlueprint(deviceName) {
       },
     };
 
-    var period = parseInt(`${60 / defaultMessagesPerHour}`, 10);
+    var period = parseInt(`${3600 / defaultMessagesPerHour}`, 10);
     var body = {
       displayName: deviceName,
       observations: {
@@ -559,7 +559,7 @@ exports.frequencyProfile = functions.firestore
   });
 
 function updateBlueprint(messagesPerHour, blueprintId) {
-  var period = parseInt(`${60 / messagesPerHour}`, 10);
+  var period = parseInt(`${3600 / messagesPerHour}`, 10);
   console.log("period :>> ", period);
 
   return new Promise((resolve, reject) => {
@@ -660,6 +660,41 @@ function updateBlueprint(messagesPerHour, blueprintId) {
             lte: null,
           },
         },
+      },
+      state: {
+        "/imu/temp/enable": true,
+        "/location/coordinates/period": 10,
+        "/imu/gyro/period": 10,
+        "/io/config": {
+          devs: [
+            {
+              conf: [
+                {
+                  baud: "9600",
+                  routing: "IOT0",
+                  wire: "2",
+                  stop: "1",
+                  own: "orp",
+                  bits: 8,
+                  type: "UART1",
+                  pair: "N",
+                  flow: "N",
+                },
+              ],
+              type: "serial",
+            },
+          ],
+        },
+        "/cloudInterface/developer_mode/close_on_inactivity": true,
+        "/imu/accel/enable": true,
+        "/imu/temp/period": 10,
+        "/imu/gyro/enable": true,
+        "/environment/lowPower": false,
+        "/environment/enable": true,
+        "/location/coordinates/enable": true,
+        "/cloudInterface/developer_mode/enable": true,
+        "/imu/accel/period": 10,
+        "/environment/ambientAirTemp": 25,
       },
     };
 
