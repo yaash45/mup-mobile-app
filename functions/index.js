@@ -237,6 +237,15 @@ exports.createAndApplyBlueprint = functions.firestore
         "applyBlueprintResponse.head.status :>> ",
         applyBlueprintResponse.head.status
       );
+
+      var cloudConnectorPromises = createEnvironmentCloudConnectorPromises(
+        data["body"]["name"],
+        data["body"]["hardware"]["imei"]
+      );
+
+      Promise.all(cloudConnectorPromises).then((values) => {
+        console.log("cloud connector promise resolution result :>> ", values);
+      });
     } catch (e) {
       console.error(e);
     }
@@ -512,6 +521,84 @@ function deleteBlueprint(blueprintId) {
   });
 }
 
+function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
+  var environmentSensorUnits = {
+    temperature: `°C`,
+    breath_voc: `ug/m3`,
+    iaq: `iaq`,
+    humidity: `%`,
+    pressure: `pa`,
+    co2_equivalent: `co2e`,
+  };
+
+  var cloudCreatorPromises = [];
+
+  for (var sensor in environmentSensorUnits) {
+    var unit = environmentSensorUnits[sensor];
+
+    cloudCreatorPromises.push(
+      new Promise((resolve, reject) => {
+        const createCloudConnectorOptions = {
+          hostname: "octave-api.sierrawireless.io",
+          path: `/v5.0/capstone_uop2021/connector/`,
+          method: "POST",
+          headers: {
+            "X-Auth-Token": functions.config().octave.auth_token,
+            "X-Auth-User": functions.config().octave.auth_user,
+          },
+        };
+        var body = {
+          type: "http-connector",
+          source: `/capstone_uop2021/devices/${deviceName}/${sensor}`,
+          disabled: false,
+          displayName: `${deviceName}: ${sensor}`,
+          description: `${deviceName}: ${sensor}`,
+          js: `function (event) {\n\t\n\tvar timestamp = event.generatedDate;\n  var value = event.elems.environment.${sensor};\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "imei": {\n\t\t\t\t"integerValue": ${deviceImei}\n      },\n      "type": {\n        "stringValue": "${sensor}"\n      },\n      "timestamp": {\n        "integerValue": timestamp\n      },\n      "value": {\n        "doubleValue": value\n      },\n      "unit": {\n        "stringValue": "${unit}"\n      },\n      "anomaly": {\n        "booleanValue": false\n      }\n    }\n  });\n  \n\treturn body;\n}`,
+          routingScript:
+            'function (event) {\n\n\treturn "https://firestore.googleapis.com/v1/projects/capstonemuop/databases/(default)/documents/datapoints"\n\n}',
+          headers: {
+            "Content-Type": "application/json",
+          },
+          properties: {
+            method: "POST",
+            successCodes: [
+              200, 201, 202, 203, 204, 205, 206, 207, 226, 400, 401, 402, 403,
+              404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416,
+              417, 418, 422, 423, 424, 426, 428, 429, 431, 451,
+            ],
+          },
+        };
+
+        var req = https.request(createCloudConnectorOptions, (res) => {
+          res.setEncoding("utf8");
+          var response = "";
+
+          res.on("data", (d) => {
+            response += d;
+          });
+
+          res.on("end", () => {
+            var jsonResult = JSON.parse(response);
+
+            if (jsonResult.head.status === 201) {
+              resolve(jsonResult);
+            } else {
+              reject(jsonResult);
+            }
+          });
+        });
+
+        req.on("error", (err) => reject(err));
+        req.write(JSON.stringify(body));
+        req.end();
+      })
+    );
+  }
+
+  return cloudCreatorPromises;
+}
+
+//Frequency profile
 exports.frequencyProfile = functions.firestore
   .document("frequencyProfile/{imei}")
   .onUpdate(async (change, context) => {
