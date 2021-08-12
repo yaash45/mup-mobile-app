@@ -243,9 +243,31 @@ exports.createAndApplyBlueprint = functions.firestore
         data["body"]["hardware"]["imei"]
       );
 
-      Promise.all(cloudConnectorPromises).then((values) => {
-        console.log("cloud connector promise resolution result :>> ", values);
-      });
+      Promise.all(cloudConnectorPromises)
+        .then((responses) => {
+          var cloudConnectorIdMap = {};
+          for (var i = 0; i < responses.length; ++i) {
+            var response = responses[i];
+            console.log("response :>> ", response);
+            cloudConnectorIdMap[`${response.displayName}`] = response.id;
+          }
+
+          console.log("cloudConnectorIdMap :>> ", cloudConnectorIdMap);
+
+          return cloudConnectorIdMap;
+        })
+        .then((cloudConnectorIds) => {
+          return db
+            .collection("cloudConnectors")
+            .doc(`${context.params.imei}`)
+            .set(cloudConnectorIds);
+        })
+        .then((result) => {
+          console.log("result :>> ", result);
+        })
+        .catch((reason) => {
+          console.error(reason);
+        });
     } catch (e) {
       console.error(e);
     }
@@ -483,6 +505,31 @@ exports.deleteBlueprint = functions.firestore
       "deleteBlueprintResponse.head.status :>> ",
       deleteBlueprintResponse.head.status
     );
+
+    // get all cloud connectors for device
+    var cloudConnectorsDocument = await db
+      .collection("cloudConnectors")
+      .doc(`${context.params.imei}`)
+      .get();
+
+    var environmentConnectorsDeletePromises = deleteEnvironmentCloudConnectors(
+      cloudConnectorsDocument.data()
+    );
+
+    Promise.all(environmentConnectorsDeletePromises)
+      .then((responses) => {
+        console.log("responses.length :>> ", responses.length);
+        return db
+          .collection("cloudConnectors")
+          .doc(`${context.params.imei}`)
+          .delete();
+      })
+      .then((result) => {
+        console.log("deleted cloud connectors. result :>> ", result);
+      })
+      .catch((reason) => {
+        console.error(reason);
+      });
   });
 
 function deleteBlueprint(blueprintId) {
@@ -550,7 +597,7 @@ function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
         var body = {
           type: "http-connector",
           source: `/capstone_uop2021/devices/${deviceName}/${sensor}`,
-          disabled: false,
+          disabled: true,
           displayName: `${deviceName}: ${sensor}`,
           description: `${deviceName}: ${sensor}`,
           js: `function (event) {\n\t\n\tvar timestamp = event.generatedDate;\n  var value = event.elems.environment.${sensor};\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "imei": {\n\t\t\t\t"integerValue": ${deviceImei}\n      },\n      "type": {\n        "stringValue": "${sensor}"\n      },\n      "timestamp": {\n        "integerValue": timestamp\n      },\n      "value": {\n        "doubleValue": value\n      },\n      "unit": {\n        "stringValue": "${unit}"\n      },\n      "anomaly": {\n        "booleanValue": false\n      }\n    }\n  });\n  \n\treturn body;\n}`,
@@ -579,9 +626,16 @@ function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
 
           res.on("end", () => {
             var jsonResult = JSON.parse(response);
-
             if (jsonResult.head.status === 201) {
-              resolve(jsonResult);
+              var displayNameSplit =
+                `${jsonResult["body"]["displayName"]}`.split(": ");
+              resolve({
+                id: jsonResult["body"]["id"],
+                displayName:
+                  displayNameSplit.length == 2
+                    ? displayNameSplit[1]
+                    : jsonResult["body"]["displayName"],
+              });
             } else {
               reject(jsonResult);
             }
@@ -596,6 +650,51 @@ function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
   }
 
   return cloudCreatorPromises;
+}
+
+function deleteEnvironmentCloudConnectors(cloudConnectorData) {
+  var deletePromises = [];
+
+  for (var connector in cloudConnectorData) {
+    var id = cloudConnectorData[connector];
+    deletePromises.push(
+      new Promise((resolve, reject) => {
+        const deleteCloudConnectorOptions = {
+          hostname: "octave-api.sierrawireless.io",
+          path: `/v5.0/capstone_uop2021/connector/${id}`,
+          method: "DELETE",
+          headers: {
+            "X-Auth-Token": functions.config().octave.auth_token,
+            "X-Auth-User": functions.config().octave.auth_user,
+          },
+        };
+
+        var req = https.request(deleteCloudConnectorOptions, (res) => {
+          res.setEncoding("utf8");
+          var response = "";
+
+          res.on("data", (d) => {
+            response += d;
+          });
+
+          res.on("end", () => {
+            var jsonResult = JSON.parse(response);
+
+            if (jsonResult.head.status === 200) {
+              resolve(jsonResult);
+            } else {
+              reject(jsonResult);
+            }
+          });
+        });
+
+        req.on("error", (err) => reject(err));
+        req.end();
+      })
+    );
+  }
+
+  return deletePromises;
 }
 
 //Frequency profile
