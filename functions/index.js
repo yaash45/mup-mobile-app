@@ -243,31 +243,23 @@ exports.createAndApplyBlueprint = functions.firestore
         data["body"]["hardware"]["imei"]
       );
 
-      Promise.all(cloudConnectorPromises)
-        .then((responses) => {
-          var cloudConnectorIdMap = {};
-          for (var i = 0; i < responses.length; ++i) {
-            var response = responses[i];
-            console.log("response :>> ", response);
-            cloudConnectorIdMap[`${response.displayName}`] = response.id;
-          }
+      var responses = await Promise.all(cloudConnectorPromises);
 
-          console.log("cloudConnectorIdMap :>> ", cloudConnectorIdMap);
+      var cloudConnectorIdMap = {};
 
-          return cloudConnectorIdMap;
-        })
-        .then((cloudConnectorIds) => {
-          return db
-            .collection("cloudConnectors")
-            .doc(`${context.params.imei}`)
-            .set(cloudConnectorIds);
-        })
-        .then((result) => {
-          console.log("result :>> ", result);
-        })
-        .catch((reason) => {
-          console.error(reason);
-        });
+      for (var i = 0; i < responses.length; ++i) {
+        var response = responses[i];
+        cloudConnectorIdMap[`${response.displayName}`] = response.id;
+      }
+
+      console.log("cloudConnectorIdMap :>> ", cloudConnectorIdMap);
+
+      var writeResult = await db
+        .collection("cloudConnectors")
+        .doc(`${context.params.imei}`)
+        .set(cloudConnectorIdMap);
+
+      console.log("writeResult :>> ", writeResult);
     } catch (e) {
       console.error(e);
     }
@@ -497,39 +489,34 @@ exports.deleteBlueprint = functions.firestore
   .onDelete(async (snapshot, context) => {
     var deviceData = snapshot.data();
 
-    var deleteBlueprintResponse = await deleteBlueprint(
-      deviceData["body"]["blueprintId"]["id"]
-    );
+    try {
+      var deleteBlueprintResponse = await deleteBlueprint(
+        deviceData["body"]["blueprintId"]["id"]
+      );
 
-    console.log(
-      "deleteBlueprintResponse.head.status :>> ",
-      deleteBlueprintResponse.head.status
-    );
+      console.log(
+        "deleteBlueprintResponse.head.status :>> ",
+        deleteBlueprintResponse.head.status
+      );
 
-    // get all cloud connectors for device
-    var cloudConnectorsDocument = await db
-      .collection("cloudConnectors")
-      .doc(`${context.params.imei}`)
-      .get();
+      // get all cloud connectors for device
+      var cloudConnectorsDocument = await db
+        .collection("cloudConnectors")
+        .doc(`${context.params.imei}`)
+        .get();
 
-    var environmentConnectorsDeletePromises = deleteEnvironmentCloudConnectors(
-      cloudConnectorsDocument.data()
-    );
+      var environmentConnectorsDeletePromises =
+        deleteEnvironmentCloudConnectors(cloudConnectorsDocument.data());
 
-    Promise.all(environmentConnectorsDeletePromises)
-      .then((responses) => {
-        console.log("responses.length :>> ", responses.length);
-        return db
-          .collection("cloudConnectors")
-          .doc(`${context.params.imei}`)
-          .delete();
-      })
-      .then((result) => {
-        console.log("deleted cloud connectors. result :>> ", result);
-      })
-      .catch((reason) => {
-        console.error(reason);
-      });
+      var responses = await Promise.all(environmentConnectorsDeletePromises);
+      console.log("responses.length :>> ", responses.length);
+      await db
+        .collection("cloudConnectors")
+        .doc(`${context.params.imei}`)
+        .delete();
+    } catch (err) {
+      console.error(err);
+    }
   });
 
 function deleteBlueprint(blueprintId) {
