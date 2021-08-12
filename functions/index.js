@@ -238,9 +238,18 @@ exports.createAndApplyBlueprint = functions.firestore
         applyBlueprintResponse.head.status
       );
 
+      // promises to create environment sensors cloud connectors
       var cloudConnectorPromises = createEnvironmentCloudConnectorPromises(
         data["body"]["name"],
         data["body"]["hardware"]["imei"]
+      );
+
+      // add promise to create coordinates cloud connector
+      cloudConnectorPromises.push(
+        createCoordinatesCloudConnector(
+          data["body"]["name"],
+          context.params.imei
+        )
       );
 
       var responses = await Promise.all(cloudConnectorPromises);
@@ -637,6 +646,74 @@ function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
   }
 
   return cloudCreatorPromises;
+}
+
+function createCoordinatesCloudConnector(deviceName, deviceImei) {
+  return new Promise((resolve, reject) => {
+    const createCloudConnectorOptions = {
+      hostname: "octave-api.sierrawireless.io",
+      path: `/v5.0/capstone_uop2021/connector/`,
+      method: "POST",
+      headers: {
+        "X-Auth-Token": functions.config().octave.auth_token,
+        "X-Auth-User": functions.config().octave.auth_user,
+      },
+    };
+
+    var sensor = "coordinates";
+    var body = {
+      type: "http-connector",
+      source: `/capstone_uop2021/devices/${deviceName}/${sensor}`,
+      disabled: true,
+      displayName: `${deviceName}: ${sensor}`,
+      description: `${deviceName}: ${sensor}`,
+      js: `function (event) {\n\n  var ts = event.elems.location.coordinates.ts;\n  var alt = event.elems.location.coordinates.alt;\n  var vAcc = event.elems.location.coordinates.vAcc;\n  var hAcc = event.elems.location.coordinates.hAcc;\n  var lat = event.elems.location.coordinates.lat;\n  var lon = event.elems.location.coordinates.lon;\n  var fixType = event.elems.location.coordinates.fixType;\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "imei": {\n\t\t\t\t"integerValue": ${deviceImei}\n      },\n      "type": {\n        "stringValue": "location"\n      },\n      "timestamp": {\n        "integerValue": ts\n      },\n      "alt": {\n        "doubleValue": alt\n      },\n      "vAcc": {\n        "integerValue": vAcc\n      },\n      "hAcc": {\n        "integerValue": hAcc\n      },\n      "lat": {\n        "doubleValue": lat\n      },\n      "lon": {\n        "doubleValue": lon\n      },\n      "unit": {\n        "stringValue": fixType\n      }\n    }\n  });\n  \n\treturn body;\n}`,
+      routingScript:
+        'function (event) {\n\n\treturn "https://firestore.googleapis.com/v1/projects/capstonemuop/databases/(default)/documents/mangoh_resources"\n\n}',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      properties: {
+        method: "POST",
+        successCodes: [
+          200, 201, 202, 203, 204, 205, 206, 207, 226, 400, 401, 402, 403, 404,
+          405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418,
+          422, 423, 424, 426, 428, 429, 431, 451,
+        ],
+      },
+    };
+
+    var req = https.request(createCloudConnectorOptions, (res) => {
+      res.setEncoding("utf8");
+      var response = "";
+
+      res.on("data", (d) => {
+        response += d;
+      });
+
+      res.on("end", () => {
+        var jsonResult = JSON.parse(response);
+        if (jsonResult.head.status === 201) {
+          var displayNameSplit = `${jsonResult["body"]["displayName"]}`.split(
+            ": "
+          );
+          resolve({
+            id: jsonResult["body"]["id"],
+            displayName:
+              displayNameSplit.length == 2
+                ? displayNameSplit[1]
+                : jsonResult["body"]["displayName"],
+          });
+        } else {
+          reject(jsonResult);
+        }
+      });
+    });
+
+    req.on("error", (err) => reject(err));
+    req.write(JSON.stringify(body));
+    req.end();
+  });
 }
 
 function deleteEnvironmentCloudConnectors(cloudConnectorData) {
