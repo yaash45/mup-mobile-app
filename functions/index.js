@@ -598,7 +598,7 @@ function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
         var body = {
           type: "http-connector",
           source: `/capstone_uop2021/devices/${deviceName}/${sensor}`,
-          disabled: true,
+          disabled: false,
           displayName: `${deviceName}: ${sensor}`,
           description: `${deviceName}: ${sensor}`,
           js: `function (event) {\n\t\n\tvar timestamp = event.generatedDate;\n  var value = event.elems.environment.${sensor};\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "imei": {\n\t\t\t\t"integerValue": ${deviceImei}\n      },\n      "type": {\n        "stringValue": "${sensor}"\n      },\n      "timestamp": {\n        "integerValue": timestamp\n      },\n      "value": {\n        "doubleValue": value\n      },\n      "unit": {\n        "stringValue": "${unit}"\n      },\n      "anomaly": {\n        "booleanValue": false\n      }\n    }\n  });\n  \n\treturn body;\n}`,
@@ -669,7 +669,7 @@ function createCoordinatesCloudConnector(deviceName, deviceImei) {
     var body = {
       type: "http-connector",
       source: `/capstone_uop2021/devices/${deviceName}/${sensor}`,
-      disabled: true,
+      disabled: false,
       displayName: `${deviceName}: ${sensor}`,
       description: `${deviceName}: ${sensor}`,
       js: `function (event) {\n\n  var ts = event.elems.location.coordinates.ts;\n  var alt = event.elems.location.coordinates.alt;\n  var vAcc = event.elems.location.coordinates.vAcc;\n  var hAcc = event.elems.location.coordinates.hAcc;\n  var lat = event.elems.location.coordinates.lat;\n  var lon = event.elems.location.coordinates.lon;\n  var fixType = event.elems.location.coordinates.fixType;\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "imei": {\n\t\t\t\t"integerValue": ${deviceImei}\n      },\n      "type": {\n        "stringValue": "location"\n      },\n      "timestamp": {\n        "integerValue": ts\n      },\n      "alt": {\n        "doubleValue": alt\n      },\n      "vAcc": {\n        "integerValue": vAcc\n      },\n      "hAcc": {\n        "integerValue": hAcc\n      },\n      "lat": {\n        "doubleValue": lat\n      },\n      "lon": {\n        "doubleValue": lon\n      },\n      "unit": {\n        "stringValue": fixType\n      }\n    }\n  });\n  \n\treturn body;\n}`,
@@ -737,7 +737,7 @@ function createVpsShotCloudConnector(deviceName, deviceImei) {
     var body = {
       type: "http-connector",
       source: `/capstone_uop2021/devices/${deviceName}/${sensor}`,
-      disabled: true,
+      disabled: false,
       displayName: `${deviceName}: ${sensor}`,
       description: `${deviceName}: ${sensor}`,
       js: `function (event) {\n\t\n\tvar object = event.elems.orp.asset.vps_shot;\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "base64encode": {\n\t\t\t\t"stringValue": object\n      },\n      "decoded": {\n        "booleanValue": false\n      }\n    }\n  });\n  \n\treturn body\n}`,
