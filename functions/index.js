@@ -297,7 +297,7 @@ function createBlueprint(deviceName) {
       displayName: deviceName,
       observations: {
         "/environment/value": {
-          co2_equivalent: {
+          co2EquivalentValue: {
             period: period,
             select: "co2EquivalentValue",
             function: null,
@@ -307,7 +307,7 @@ function createBlueprint(deviceName) {
             buffer: null,
             lte: null,
           },
-          iaq: {
+          iaqValue: {
             period: period,
             select: "iaqValue",
             function: null,
@@ -327,7 +327,7 @@ function createBlueprint(deviceName) {
             buffer: null,
             lte: null,
           },
-          breath_voc: {
+          breathVocValue: {
             period: period,
             select: "breathVocValue",
             function: null,
@@ -572,11 +572,11 @@ function deleteBlueprint(blueprintId) {
 function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
   var environmentSensorUnits = {
     temperature: `°C`,
-    breath_voc: `ug/m3`,
-    iaq: `iaq`,
+    breathVocValue: `ug/m3`,
+    iaqValue: `iaq`,
     humidity: `%`,
     pressure: `pa`,
-    co2_equivalent: `co2e`,
+    co2EquivalentValue: `co2e`,
   };
 
   var cloudCreatorPromises = [];
@@ -899,7 +899,7 @@ function updateBlueprint(messagesPerHour, blueprintId) {
     var body = {
       observations: {
         "/environment/value": {
-          co2_equivalent: {
+          co2EquivalentValue: {
             period: period,
             select: "co2EquivalentValue",
             function: null,
@@ -909,7 +909,7 @@ function updateBlueprint(messagesPerHour, blueprintId) {
             buffer: null,
             lte: null,
           },
-          iaq: {
+          iaqValue: {
             period: period,
             select: "iaqValue",
             function: null,
@@ -929,7 +929,7 @@ function updateBlueprint(messagesPerHour, blueprintId) {
             buffer: null,
             lte: null,
           },
-          breath_voc: {
+          breathVocValue: {
             period: period,
             select: "breathVocValue",
             function: null,
