@@ -297,7 +297,7 @@ function createBlueprint(deviceName) {
       displayName: deviceName,
       observations: {
         "/environment/value": {
-          co2_equivalent: {
+          co2e: {
             period: period,
             select: "co2EquivalentValue",
             function: null,
@@ -406,7 +406,7 @@ function createBlueprint(deviceName) {
             },
           ],
         },
-        "/cloudInterface/developer_mode/close_on_inactivity": true,
+        "/cloudInterface/developer_mode/close_on_inactivity": false,
         "/imu/accel/enable": true,
         "/imu/temp/period": 10,
         "/imu/gyro/enable": true,
@@ -570,19 +570,19 @@ function deleteBlueprint(blueprintId) {
 }
 
 function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
-  var environmentSensorUnits = {
-    temperature: `°C`,
-    breath_voc: `ug/m3`,
-    iaq: `iaq`,
-    humidity: `%`,
-    pressure: `pa`,
-    co2_equivalent: `co2e`,
+  var environmentResources = {
+    temperature: { unit: `°C`, type: `temperature` },
+    breathVocValue: { unit: `ug/m3`, type: `breath_voc` },
+    iaqValue: { unit: `iaq`, type: `iaq` },
+    humidity: { unit: `%`, type: `humidity` },
+    pressure: { unit: `pa`, type: `pressure` },
+    co2EquivalentValue: { unit: `co2e`, type: `co2e` },
   };
 
   var cloudCreatorPromises = [];
 
-  for (var sensor in environmentSensorUnits) {
-    var unit = environmentSensorUnits[sensor];
+  for (var resource in environmentResources) {
+    var sensor = environmentResources[resource];
 
     cloudCreatorPromises.push(
       new Promise((resolve, reject) => {
@@ -597,11 +597,11 @@ function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
         };
         var body = {
           type: "http-connector",
-          source: `/capstone_uop2021/devices/${deviceName}/${sensor}`,
+          source: `/capstone_uop2021/devices/${deviceName}/${sensor.type}`,
           disabled: false,
-          displayName: `${deviceName}: ${sensor}`,
-          description: `${deviceName}: ${sensor}`,
-          js: `function (event) {\n\t\n\tvar timestamp = event.generatedDate;\n  var value = event.elems.environment.${sensor};\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "imei": {\n\t\t\t\t"integerValue": ${deviceImei}\n      },\n      "type": {\n        "stringValue": "${sensor}"\n      },\n      "timestamp": {\n        "integerValue": timestamp\n      },\n      "value": {\n        "doubleValue": value\n      },\n      "unit": {\n        "stringValue": "${unit}"\n      },\n      "anomaly": {\n        "booleanValue": false\n      }\n    }\n  });\n  \n\treturn body;\n}`,
+          displayName: `${deviceName}: ${sensor.type}`,
+          description: `${deviceName}: ${sensor.type}`,
+          js: `function (event) {\n\t\n\tvar timestamp = event.generatedDate;\n  var value = event.elems.environment.${resource};\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "imei": {\n\t\t\t\t"integerValue": ${deviceImei}\n      },\n      "type": {\n        "stringValue": "${sensor.type}"\n      },\n      "timestamp": {\n        "integerValue": timestamp\n      },\n      "value": {\n        "doubleValue": value\n      },\n      "unit": {\n        "stringValue": "${sensor.unit}"\n      },\n      "anomaly": {\n        "booleanValue": false\n      }\n    }\n  });\n  \n\treturn body;\n}`,
           routingScript:
             'function (event) {\n\n\treturn "https://firestore.googleapis.com/v1/projects/capstonemuop/databases/(default)/documents/datapoints"\n\n}',
           headers: {
@@ -899,7 +899,7 @@ function updateBlueprint(messagesPerHour, blueprintId) {
     var body = {
       observations: {
         "/environment/value": {
-          co2_equivalent: {
+          co2e: {
             period: period,
             select: "co2EquivalentValue",
             function: null,
@@ -1008,7 +1008,7 @@ function updateBlueprint(messagesPerHour, blueprintId) {
             },
           ],
         },
-        "/cloudInterface/developer_mode/close_on_inactivity": true,
+        "/cloudInterface/developer_mode/close_on_inactivity": false,
         "/imu/accel/enable": true,
         "/imu/temp/period": 10,
         "/imu/gyro/enable": true,
