@@ -21,6 +21,8 @@ class DeviceData {
   bool imagedecoded;
   var testdecodedlist;
   String base64encode;
+  List<bool> sensorProfile;
+  String detectedImageTimestamp;
 
   
 
@@ -41,6 +43,8 @@ class DeviceData {
     this.imagedecoded,
     this.testdecodedlist,
     this.base64encode,
+    this.sensorProfile,
+    this.detectedImageTimestamp,
   });
 
 
@@ -60,10 +64,19 @@ class DeviceData {
     synced: doc[0].data()['body']['synced'],
     imagedecoded: doc[8].data()['decoded'],
     base64encode: doc[8].data()['base64encode'],
+    detectedImageTimestamp : doc[8].data()['detectedImageTimestamp'],
     //testdecodedlist: doc[9].docs,
+    sensorProfile: [
+    doc[9].data()['temperature'],
+    doc[9].data()['humidity'],
+    doc[9].data()['pressure'],
+    doc[9].data()['iaq'],
+    doc[9].data()['breathVoc'],
+    doc[9].data()['co2Equivalent'],
+    ],
 
     test: doc[2].docs[0]['type'],
-    DatapointList: [doc[2].docs[0],doc[3].docs[0],doc[4].docs[0],doc[5].docs[0],doc[6].docs[0],
+    DatapointList:[doc[2].docs[0],doc[3].docs[0],doc[4].docs[0],doc[5].docs[0],doc[6].docs[0],
     doc[7].docs[0]],
     //
     TempList: [doc[2].docs,doc[3].docs,doc[4].docs,doc[5].docs,doc[6].docs,

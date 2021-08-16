@@ -23,7 +23,7 @@ import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:badges/badges.dart';
 
-Map<String, String> SensorNames = {'iaq': 'IndoorAirQuality', 'co2e': 'Co2 Equivalent', 'breath_voc': 'Breath VOC',
+Map<String, String> SensorNames = {'iaq': 'IndoorAirQuality', 'co2e': 'co2e', 'breath_voc': 'Breath VOC',
 'temperature' : 'Temperature', 'pressure' : 'Pressure', 
 'humidity' : "Humidity"
 };
@@ -52,6 +52,7 @@ class DeviceInfo extends StatefulWidget {
 
 class _DeviceInfoState extends State<DeviceInfo> {
   final String deviceImei;
+   var tilewidget = 3;
   _DeviceInfoState(this.deviceImei);
 
   GoogleMapController mapController;
@@ -682,7 +683,12 @@ Widget testWidget3(String type, String unit, String value, int date, List<double
             );
 }
 
-Widget CustomDataTab(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph, DeviceData theDeviceData, int indexfromList){
+Widget CustomDataTab(String type, String unit, String value, int date, List<double>charts, int indexnum, List<_DataPoints> graph, DeviceData theDeviceData, int indexfromList, bool visible){
+  if (!visible) {
+  return DisabledWidget(type, indexnum);
+ 
+ }
+  else
   if(tilesize[indexnum] == originaltilesizes[indexnum]){
     return testWidget2(type, unit, value, date, charts, indexnum);
   }
@@ -699,7 +705,7 @@ List<double> returnSparkChart(int index, DeviceData theDeviceData){
   theDeviceData.TempList[index].forEach((element) {
         data.add(element['value'].toDouble());
        }); 
-  return data;
+  return new List.from(data.reversed);
 }
 List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
   List<_DataPoints> data = [];
@@ -708,8 +714,261 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                 'value'
               ].toDouble()));
        }); 
-  return data;
+  return new List.from(data.reversed);
 }
+List<Widget> ListOfWidgets(DeviceData theDeviceData){
+List<Widget> mylist = <Widget> [];
+ mylist.add(
+_buildPrelimTile(
+                    Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
+                    ),
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      heightFactor: 1,
+                      widthFactor: 1,
+                      child: GoogleMap(
+                        onMapCreated: _onMapCreated,
+                        myLocationEnabled: true,
+                        markers: _createMarker(theDeviceData.lat, theDeviceData.lon),
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(theDeviceData.lat, theDeviceData.lon),
+                          zoom: 9.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+                ));
+mylist.add(
+_buildPrelimTile(
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                            Row(
+                              
+                               children: [
+                                 Tooltip(message:"This shows your report data",
+                                   child: Text('Report',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 20.0)),
+                                 ),
+                               VerticalDivider(width:35),
+                                Material(
+                                  child: 
+                                  Row(
+                                    children: [
+                                          SignalStrengthIndicator.bars(
+                                        value: theDeviceData.signalStrength,
+                                        minValue: -110,
+                                        maxValue: 0,
+                                        levels: <num, Color>{
+                                          -60: Colors.red,
+                                          50: Colors.yellow,
+                                          75: Colors.green,
+                                        },
+                                        size: 20,
+                                        barCount: 5,
+                                        spacing: 0.2,
+                                        activeColor: Colors.lightBlue,
+                                        ),     
+                                Text(theDeviceData.signalratvalue.toString().toUpperCase(), style: TextStyle(color: Colors.black45, fontSize: 15.0)),
+                                Tooltip(message: "Notifies power status of your device",
+                                  child: Transform.rotate(
+                                  angle: 1.57,
+                                  child:
+                                     Icon(
+                                    BatteryConnected[theDeviceData.battery],
+                                      size: 20,
+                                    ),
+                                    ),
+                                ),
+                                    ],
+                                  )
+                                )
+                               ],
+                             
+                           ),
+                         //provisioning, name, time last seen, synced
+                          Divider(),
+                          Row(children: [
+                                 Text("Name ", style: TextStyle(fontWeight: FontWeight.w500)),
+                                 Text(theDeviceData.name.toString(), style: TextStyle(color: Colors.black45)),
+                              ],
+                           ),
+                          Divider(),
+                          Row(children: [
+                                 Text("Status ", style: TextStyle(fontWeight: FontWeight.w500)),
+                                 Text(theDeviceData.provisioningStatus.toString().toLowerCase(), style: TextStyle(color: Colors.black45)),
+                              ],
+                           ), 
+                          Divider(),
+                          Row(children: [
+                                 Text("Synced ", style: TextStyle(fontWeight: FontWeight.w500)),
+                                 Text(theDeviceData.synced.toString().toLowerCase(), style: TextStyle(color: Colors.black45)),
+                              ],
+                           ), 
+                          Divider(),
+                          Row(
+                          children :[
+                          Text("Last Seen ", style: TextStyle(fontWeight: FontWeight.w500)),
+                          Text(GetTimeAgo.parse(DateTime.now().subtract(Duration(milliseconds: theDeviceData.timeSinceLastSeen))),
+                          softWrap: false,
+                          overflow: TextOverflow.clip,
+                           style: TextStyle(color: Colors.black45, fontSize:12 )),
+                          ]
+                          ),
+                          
+                              
+                          
+                           
+                          
+                        //  Padding(padding: EdgeInsets.only(bottom: 16.0)),
+                        //  Text(theDeviceData.signalStrength.abs().toString(), style: TextStyle(fontWeight: FontWeight.w500)),
+                        ]),
+                  ),
+                ));
+mylist.add(_buildPrelimTile(
+                    Padding(
+                      padding: const EdgeInsets.all(0),
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                          Badge(
+                            
+                            showBadge: theDeviceData.imagedecoded,
+                            badgeContent:  Text("1", style: TextStyle(fontSize: 20,
+                            color: Colors.white,
+                            )),
+                              child:
+                             Material(
+                                  color: Colors.amber,
+                                  shape: CircleBorder(),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(10.0),
+                                    child: IconButton(
+                                      
+                                      onPressed: theDeviceData.imagedecoded?
+                                      () {
+                                        showDialog(context: context, builder: 
+                                         (BuildContext context) =>  BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+      child:  AlertDialog(
+      title: new Text('Object Detected'),
+      content: Image.memory(base64Decode(theDeviceData.base64encode)
+      ),
+      /*FutureBuilder<String>(future: OurDatabase().downloadURLExample(),
+      builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.done) {
+        return Image.network(snapshot.data.toString());
+      }
+      else {
+        return Text("No data");
+      }
+      }
+      ,), */      
+      actions: <Widget>[
+       /* new TextButton(
+          child: new Text("Continue"),
+           onPressed: () {
+           
+          },
+        ),*/
+        new TextButton(
+          child: Text("OK"),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+      ))
+                                        ); 
+                                        
+                                      } : null,
+                                      
+                                      icon: Icon(Icons.notifications,
+                                        color: Colors.white, size: 30.0),
+                                  ))),
+                          ),
+                            Padding(padding: EdgeInsets.only(bottom: 16.0)),
+                             Text('Alerts',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 20.0)),
+                            
+                           // Text('All ', style: TextStyle(color: Colors.black45)),
+                          ]),
+                    ),
+                  ));
+
+var tilenum = 0;
+for (var i = 0; i < 6; i++){
+if(theDeviceData.sensorProfile[i]){
+  mylist.add(CustomDataTab(theDeviceData.DatapointList[i]['type'].toString(), theDeviceData.DatapointList[i]['unit'].toString(), theDeviceData.DatapointList[i]['value'].round().toString(), theDeviceData.DatapointList[i]['timestamp'], returnSparkChart(i, theDeviceData), 3 + tilenum, returnGraph(i, theDeviceData), theDeviceData, i, theDeviceData.sensorProfile[i]));
+ tilenum++;
+ 
+} 
+} 
+for(var i = 0; i < mylist.length; i++){
+print(mylist[i]);
+}
+
+return mylist;
+
+}
+
+Widget DisabledWidget(String type, int indexnum){
+  return _buildTile(
+             indexnum,
+              Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                         mainAxisAlignment: MainAxisAlignment.start,
+                       // crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                           Material(
+                          color: Colors.blue[200],
+                          borderRadius: BorderRadius.circular(20.0),
+                          child: Center(
+                              child: Padding(
+                            padding: EdgeInsets.all(15.0),
+                            child: Icon(IconValues[type],
+                                color: Colors.white, size: 25.0),
+                          )
+                          )
+                          ),
+                          VerticalDivider(),
+                              Text(SensorNames[type] +' Sensor Disabled',
+                                  style: TextStyle(color: Colors.red,
+                                  fontWeight: FontWeight.w500
+                                  )
+                                  ),   
+                            ]
+                          
+                  
+                      ),
+                     
+                    ],
+                  )),
+            );
+}
+
 
 
   @override
@@ -749,24 +1008,21 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                 'value'
               ]));
             }); */
-            List<double> Humiditydata = [];
-             theDeviceData.TempList[1].forEach((element) {
-              Humiditydata.add(element['value']);
-            }); 
-            List<double> iaqdata = [];
-             theDeviceData.TempList[2].forEach((element) {
-              iaqdata.add(element['value']);
-            }); 
-           // double num1 = theDeviceData.TempList[5][0]['value'].toDouble();
-            //print(num1);
-           // print(theDeviceData.TempList[5][0]['value'].runtimeType);
-          
+          List<dynamic> renderedWidgets = [];
+          List<dynamic> renderedGraphs = [];
+          for(var i = 0; i < theDeviceData.sensorProfile.length; i++){
+            if(theDeviceData.sensorProfile[i]){
+              renderedWidgets.add(theDeviceData.DatapointList[i]);
+              renderedGraphs.add(theDeviceData.TempList[i]);
+            }
+          }
           return StaggeredGridView.count(
               crossAxisCount: 2,
               crossAxisSpacing: 12.0,
               mainAxisSpacing: 12.0,
               padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-              children: <Widget>[
+              children: 
+              <Widget>[
                 _buildPrelimTile(
                     Center(
                   child: ClipRRect(
@@ -907,14 +1163,22 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                                     child: IconButton(
                                       
                                       onPressed: theDeviceData.imagedecoded?
+                                     // true?
                                       () {
                                         showDialog(context: context, builder: 
                                          (BuildContext context) =>  BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
       child:  AlertDialog(
-      title: new Text('Object Detected'),
-      content: Image.memory(base64Decode(theDeviceData.base64encode)
-      ),
+      title: new Text('Intruder Detected'),
+      content:
+         Wrap(
+        children:[
+         Image.memory(base64Decode(theDeviceData.base64encode)),
+         Text("Image received :" + returnDate(int.parse(theDeviceData.detectedImageTimestamp)))
+        ]
+         ),
+  
+      
       /*FutureBuilder<String>(future: OurDatabase().downloadURLExample(),
       builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.done) {
@@ -935,6 +1199,14 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
         new TextButton(
           child: Text("OK"),
           onPressed: () {
+            DocumentReference firestore = FirebaseFirestore.instance.collection('alerts').doc('detectedimage');
+            firestore.set(
+              {
+               'decoded': false,
+              },
+            SetOptions(merge: true),
+            );
+
             Navigator.of(context).pop();
           },
         ),
@@ -942,7 +1214,8 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
       ))
                                         ); 
                                         
-                                      } : null,
+                                      } 
+                                      : null,
                                       
                                       icon: Icon(Icons.notifications,
                                         color: Colors.white, size: 30.0),
@@ -970,8 +1243,10 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                 _buildDataTab(theDeviceData.DatapointList[4]['type'].toString(), theDeviceData.DatapointList[4]['unit'].toString(), theDeviceData.DatapointList[4]['value'].toString(), theDeviceData.DatapointList[4]['timestamp'].toString()),
               Visibility(child:_buildDataTab(theDeviceData.DatapointList[5]['type'].toString(), theDeviceData.DatapointList[5]['unit'].toString(), theDeviceData.DatapointList[5]['value'].toString(), theDeviceData.DatapointList[5]['timestamp'].toString())
                , visible: false,) */
-               for (var i = 0; i < 6; i++) CustomDataTab(theDeviceData.DatapointList[i]['type'].toString(), theDeviceData.DatapointList[i]['unit'].toString(), theDeviceData.DatapointList[i]['value'].round().toString(), theDeviceData.DatapointList[i]['timestamp'], returnSparkChart(i, theDeviceData),startingTileIndex + i, returnGraph(i, theDeviceData), theDeviceData, i),
-              ],
+             // for (var i = 0; i < 6; i++) CustomDataTab(theDeviceData.DatapointList[i]['type'].toString(), theDeviceData.DatapointList[i]['unit'].toString(), theDeviceData.DatapointList[i]['value'].round().toString(), theDeviceData.DatapointList[i]['timestamp'], returnSparkChart(i, theDeviceData),startingTileIndex + i, returnGraph(i, theDeviceData), theDeviceData, i),
+              for (var i = 0; i < 6; i++)  CustomDataTab(theDeviceData.DatapointList[i]['type'].toString(), theDeviceData.DatapointList[i]['unit'].toString(), theDeviceData.DatapointList[i]['value'].toStringAsFixed(1), theDeviceData.DatapointList[i]['timestamp'], returnSparkChart(i, theDeviceData),startingTileIndex + i, returnGraph(i, theDeviceData), theDeviceData, i, theDeviceData.sensorProfile[i]),
+             
+              ], 
               staggeredTiles: [
                 StaggeredTile.extent(2, tilesize[0]),
                 StaggeredTile.extent(1, tilesize[1]),
@@ -984,13 +1259,14 @@ List<_DataPoints> returnGraph(int index, DeviceData theDeviceData){
                 StaggeredTile.extent(2,tilesize[7]),
                 StaggeredTile.extent(2,tilesize[8]),
                
-              ],
+              ], 
             );
          }
           }
         ));
   }
 }
+
 
 class _SalesData {
   _SalesData(this.year, this.sales);
@@ -1004,3 +1280,4 @@ class _DataPoints{
   final String time;
   final double value;
 }
+

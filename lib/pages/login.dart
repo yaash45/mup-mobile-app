@@ -136,7 +136,9 @@ class _LoginState extends State<Login> {
             Padding(
               padding: const EdgeInsets.only(left:15.0,right: 15.0,top:20,bottom: 0),
              // padding: EdgeInsets.symmetric(horizontal: 15),
-              child: TextFormField(
+              child:
+               TextFormField(
+                key: Key("Email"),
                 controller: _emailField,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -151,6 +153,7 @@ class _LoginState extends State<Login> {
                   left: 15.0, right: 15.0, top: 15, bottom: 0),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextFormField(
+                key: Key("Password"),
                 controller: _passwordField,
                 obscureText: true,
                 decoration: InputDecoration(

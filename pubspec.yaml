@@ -49,6 +49,7 @@ dependencies:
   get_time_ago: ^1.0.3
   badges: ^2.0.1
   firebase_storage: ^10.0.1
+  mockito: ^5.0.14
   
 
 dev_dependencies:
