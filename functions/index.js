@@ -237,6 +237,43 @@ exports.createAndApplyBlueprint = functions.firestore
         "applyBlueprintResponse.head.status :>> ",
         applyBlueprintResponse.head.status
       );
+
+      // promises to create environment sensors cloud connectors
+      var cloudConnectorPromises = createEnvironmentCloudConnectorPromises(
+        data["body"]["name"],
+        context.params.imei
+      );
+
+      // add promise to create coordinates cloud connector
+      cloudConnectorPromises.push(
+        createCoordinatesCloudConnector(
+          data["body"]["name"],
+          context.params.imei
+        )
+      );
+
+      // add promise to create vps_shot cloud connector
+      cloudConnectorPromises.push(
+        createVpsShotCloudConnector(data["body"]["name"], context.params.imei)
+      );
+
+      var responses = await Promise.all(cloudConnectorPromises);
+
+      var cloudConnectorIdMap = {};
+
+      for (var i = 0; i < responses.length; ++i) {
+        var response = responses[i];
+        cloudConnectorIdMap[`${response.displayName}`] = response.id;
+      }
+
+      console.log("cloudConnectorIdMap :>> ", cloudConnectorIdMap);
+
+      var writeResult = await db
+        .collection("cloudConnectors")
+        .doc(`${context.params.imei}`)
+        .set(cloudConnectorIdMap);
+
+      console.log("writeResult :>> ", writeResult);
     } catch (e) {
       console.error(e);
     }
@@ -255,12 +292,12 @@ function createBlueprint(deviceName) {
       },
     };
 
-    var period = parseInt(`${60 / defaultMessagesPerHour}`, 10);
+    var period = parseInt(`${3600 / defaultMessagesPerHour}`, 10);
     var body = {
       displayName: deviceName,
       observations: {
         "/environment/value": {
-          co2_equivalent: {
+          co2e: {
             period: period,
             select: "co2EquivalentValue",
             function: null,
@@ -369,7 +406,7 @@ function createBlueprint(deviceName) {
             },
           ],
         },
-        "/cloudInterface/developer_mode/close_on_inactivity": true,
+        "/cloudInterface/developer_mode/close_on_inactivity": false,
         "/imu/accel/enable": true,
         "/imu/temp/period": 10,
         "/imu/gyro/enable": true,
@@ -466,14 +503,34 @@ exports.deleteBlueprint = functions.firestore
   .onDelete(async (snapshot, context) => {
     var deviceData = snapshot.data();
 
-    var deleteBlueprintResponse = await deleteBlueprint(
-      deviceData["body"]["blueprintId"]["id"]
-    );
+    try {
+      var deleteBlueprintResponse = await deleteBlueprint(
+        deviceData["body"]["blueprintId"]["id"]
+      );
 
-    console.log(
-      "deleteBlueprintResponse.head.status :>> ",
-      deleteBlueprintResponse.head.status
-    );
+      console.log(
+        "deleteBlueprintResponse.head.status :>> ",
+        deleteBlueprintResponse.head.status
+      );
+
+      // get all cloud connectors for device
+      var cloudConnectorsDocument = await db
+        .collection("cloudConnectors")
+        .doc(`${context.params.imei}`)
+        .get();
+
+      var environmentConnectorsDeletePromises =
+        deleteEnvironmentCloudConnectors(cloudConnectorsDocument.data());
+
+      var responses = await Promise.all(environmentConnectorsDeletePromises);
+      console.log("responses.length :>> ", responses.length);
+      await db
+        .collection("cloudConnectors")
+        .doc(`${context.params.imei}`)
+        .delete();
+    } catch (err) {
+      console.error(err);
+    }
   });
 
 function deleteBlueprint(blueprintId) {
@@ -512,6 +569,272 @@ function deleteBlueprint(blueprintId) {
   });
 }
 
+function createEnvironmentCloudConnectorPromises(deviceName, deviceImei) {
+  var environmentResources = {
+    temperature: { unit: `°C`, type: `temperature` },
+    breathVocValue: { unit: `ug/m3`, type: `breath_voc` },
+    iaqValue: { unit: `iaq`, type: `iaq` },
+    humidity: { unit: `%`, type: `humidity` },
+    pressure: { unit: `pa`, type: `pressure` },
+    co2EquivalentValue: { unit: `co2e`, type: `co2e` },
+  };
+
+  var cloudCreatorPromises = [];
+
+  for (var resource in environmentResources) {
+    var sensor = environmentResources[resource];
+
+    cloudCreatorPromises.push(
+      new Promise((resolve, reject) => {
+        const createCloudConnectorOptions = {
+          hostname: "octave-api.sierrawireless.io",
+          path: `/v5.0/capstone_uop2021/connector/`,
+          method: "POST",
+          headers: {
+            "X-Auth-Token": functions.config().octave.auth_token,
+            "X-Auth-User": functions.config().octave.auth_user,
+          },
+        };
+        var body = {
+          type: "http-connector",
+          source: `/capstone_uop2021/devices/${deviceName}/${sensor.type}`,
+          disabled: false,
+          displayName: `${deviceName}: ${sensor.type}`,
+          description: `${deviceName}: ${sensor.type}`,
+          js: `function (event) {\n\t\n\tvar timestamp = event.generatedDate;\n  var value = event.elems.environment.${resource};\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "imei": {\n\t\t\t\t"integerValue": ${deviceImei}\n      },\n      "type": {\n        "stringValue": "${sensor.type}"\n      },\n      "timestamp": {\n        "integerValue": timestamp\n      },\n      "value": {\n        "doubleValue": value\n      },\n      "unit": {\n        "stringValue": "${sensor.unit}"\n      },\n      "anomaly": {\n        "booleanValue": false\n      }\n    }\n  });\n  \n\treturn body;\n}`,
+          routingScript:
+            'function (event) {\n\n\treturn "https://firestore.googleapis.com/v1/projects/capstonemuop/databases/(default)/documents/datapoints"\n\n}',
+          headers: {
+            "Content-Type": "application/json",
+          },
+          properties: {
+            method: "POST",
+            successCodes: [
+              200, 201, 202, 203, 204, 205, 206, 207, 226, 400, 401, 402, 403,
+              404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416,
+              417, 418, 422, 423, 424, 426, 428, 429, 431, 451,
+            ],
+          },
+        };
+
+        var req = https.request(createCloudConnectorOptions, (res) => {
+          res.setEncoding("utf8");
+          var response = "";
+
+          res.on("data", (d) => {
+            response += d;
+          });
+
+          res.on("end", () => {
+            var jsonResult = JSON.parse(response);
+            if (jsonResult.head.status === 201) {
+              var displayNameSplit =
+                `${jsonResult["body"]["displayName"]}`.split(": ");
+              resolve({
+                id: jsonResult["body"]["id"],
+                displayName:
+                  displayNameSplit.length == 2
+                    ? displayNameSplit[1]
+                    : jsonResult["body"]["displayName"],
+              });
+            } else {
+              reject(jsonResult);
+            }
+          });
+        });
+
+        req.on("error", (err) => reject(err));
+        req.write(JSON.stringify(body));
+        req.end();
+      })
+    );
+  }
+
+  return cloudCreatorPromises;
+}
+
+function createCoordinatesCloudConnector(deviceName, deviceImei) {
+  return new Promise((resolve, reject) => {
+    const createCloudConnectorOptions = {
+      hostname: "octave-api.sierrawireless.io",
+      path: `/v5.0/capstone_uop2021/connector/`,
+      method: "POST",
+      headers: {
+        "X-Auth-Token": functions.config().octave.auth_token,
+        "X-Auth-User": functions.config().octave.auth_user,
+      },
+    };
+
+    var sensor = "coordinates";
+    var body = {
+      type: "http-connector",
+      source: `/capstone_uop2021/devices/${deviceName}/${sensor}`,
+      disabled: false,
+      displayName: `${deviceName}: ${sensor}`,
+      description: `${deviceName}: ${sensor}`,
+      js: `function (event) {\n\n  var ts = event.elems.location.coordinates.ts;\n  var alt = event.elems.location.coordinates.alt;\n  var vAcc = event.elems.location.coordinates.vAcc;\n  var hAcc = event.elems.location.coordinates.hAcc;\n  var lat = event.elems.location.coordinates.lat;\n  var lon = event.elems.location.coordinates.lon;\n  var fixType = event.elems.location.coordinates.fixType;\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "imei": {\n\t\t\t\t"integerValue": ${deviceImei}\n      },\n      "type": {\n        "stringValue": "location"\n      },\n      "timestamp": {\n        "integerValue": ts\n      },\n      "alt": {\n        "doubleValue": alt\n      },\n      "vAcc": {\n        "integerValue": vAcc\n      },\n      "hAcc": {\n        "integerValue": hAcc\n      },\n      "lat": {\n        "doubleValue": lat\n      },\n      "lon": {\n        "doubleValue": lon\n      },\n      "unit": {\n        "stringValue": fixType\n      }\n    }\n  });\n  \n\treturn body;\n}`,
+      routingScript:
+        'function (event) {\n\n\treturn "https://firestore.googleapis.com/v1/projects/capstonemuop/databases/(default)/documents/mangoh_resources"\n\n}',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      properties: {
+        method: "POST",
+        successCodes: [
+          200, 201, 202, 203, 204, 205, 206, 207, 226, 400, 401, 402, 403, 404,
+          405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418,
+          422, 423, 424, 426, 428, 429, 431, 451,
+        ],
+      },
+    };
+
+    var req = https.request(createCloudConnectorOptions, (res) => {
+      res.setEncoding("utf8");
+      var response = "";
+
+      res.on("data", (d) => {
+        response += d;
+      });
+
+      res.on("end", () => {
+        var jsonResult = JSON.parse(response);
+        if (jsonResult.head.status === 201) {
+          var displayNameSplit = `${jsonResult["body"]["displayName"]}`.split(
+            ": "
+          );
+          resolve({
+            id: jsonResult["body"]["id"],
+            displayName:
+              displayNameSplit.length == 2
+                ? displayNameSplit[1]
+                : jsonResult["body"]["displayName"],
+          });
+        } else {
+          reject(jsonResult);
+        }
+      });
+    });
+
+    req.on("error", (err) => reject(err));
+    req.write(JSON.stringify(body));
+    req.end();
+  });
+}
+
+function createVpsShotCloudConnector(deviceName, deviceImei) {
+  return new Promise((resolve, reject) => {
+    const createCloudConnectorOptions = {
+      hostname: "octave-api.sierrawireless.io",
+      path: `/v5.0/capstone_uop2021/connector/`,
+      method: "POST",
+      headers: {
+        "X-Auth-Token": functions.config().octave.auth_token,
+        "X-Auth-User": functions.config().octave.auth_user,
+      },
+    };
+
+    var sensor = "vps_shot";
+    var body = {
+      type: "http-connector",
+      source: `/capstone_uop2021/devices/${deviceName}/${sensor}`,
+      disabled: false,
+      displayName: `${deviceName}: ${sensor}`,
+      description: `${deviceName}: ${sensor}`,
+      js: `function (event) {\n\t\n\tvar object = event.elems.orp.asset.vps_shot;\n\n\tvar body = JSON.stringify({\n    "fields": {\n      "base64encode": {\n\t\t\t\t"stringValue": object\n      },\n      "decoded": {\n        "booleanValue": false\n      }\n    }\n  });\n  \n\treturn body\n}`,
+      routingScript:
+        'function (event) {\n\n\treturn "https://firestore.googleapis.com/v1/projects/capstonemuop/databases/(default)/documents/alerts/detectedimage"\n\n}',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      properties: {
+        method: "POST",
+        successCodes: [
+          200, 201, 202, 203, 204, 205, 206, 207, 226, 400, 401, 402, 403, 404,
+          405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418,
+          422, 423, 424, 426, 428, 429, 431, 451,
+        ],
+      },
+    };
+
+    var req = https.request(createCloudConnectorOptions, (res) => {
+      res.setEncoding("utf8");
+      var response = "";
+
+      res.on("data", (d) => {
+        response += d;
+      });
+
+      res.on("end", () => {
+        var jsonResult = JSON.parse(response);
+        if (jsonResult.head.status === 201) {
+          var displayNameSplit = `${jsonResult["body"]["displayName"]}`.split(
+            ": "
+          );
+          resolve({
+            id: jsonResult["body"]["id"],
+            displayName:
+              displayNameSplit.length == 2
+                ? displayNameSplit[1]
+                : jsonResult["body"]["displayName"],
+          });
+        } else {
+          reject(jsonResult);
+        }
+      });
+    });
+
+    req.on("error", (err) => reject(err));
+    req.write(JSON.stringify(body));
+    req.end();
+  });
+}
+
+function deleteEnvironmentCloudConnectors(cloudConnectorData) {
+  var deletePromises = [];
+
+  for (var connector in cloudConnectorData) {
+    var id = cloudConnectorData[connector];
+    deletePromises.push(
+      new Promise((resolve, reject) => {
+        const deleteCloudConnectorOptions = {
+          hostname: "octave-api.sierrawireless.io",
+          path: `/v5.0/capstone_uop2021/connector/${id}`,
+          method: "DELETE",
+          headers: {
+            "X-Auth-Token": functions.config().octave.auth_token,
+            "X-Auth-User": functions.config().octave.auth_user,
+          },
+        };
+
+        var req = https.request(deleteCloudConnectorOptions, (res) => {
+          res.setEncoding("utf8");
+          var response = "";
+
+          res.on("data", (d) => {
+            response += d;
+          });
+
+          res.on("end", () => {
+            var jsonResult = JSON.parse(response);
+
+            if (jsonResult.head.status === 200) {
+              resolve(jsonResult);
+            } else {
+              reject(jsonResult);
+            }
+          });
+        });
+
+        req.on("error", (err) => reject(err));
+        req.end();
+      })
+    );
+  }
+
+  return deletePromises;
+}
+
+//Frequency profile
 exports.frequencyProfile = functions.firestore
   .document("frequencyProfile/{imei}")
   .onUpdate(async (change, context) => {
@@ -559,7 +882,7 @@ exports.frequencyProfile = functions.firestore
   });
 
 function updateBlueprint(messagesPerHour, blueprintId) {
-  var period = parseInt(`${60 / messagesPerHour}`, 10);
+  var period = parseInt(`${3600 / messagesPerHour}`, 10);
   console.log("period :>> ", period);
 
   return new Promise((resolve, reject) => {
@@ -576,7 +899,7 @@ function updateBlueprint(messagesPerHour, blueprintId) {
     var body = {
       observations: {
         "/environment/value": {
-          co2_equivalent: {
+          co2e: {
             period: period,
             select: "co2EquivalentValue",
             function: null,
@@ -660,6 +983,41 @@ function updateBlueprint(messagesPerHour, blueprintId) {
             lte: null,
           },
         },
+      },
+      state: {
+        "/imu/temp/enable": true,
+        "/location/coordinates/period": 10,
+        "/imu/gyro/period": 10,
+        "/io/config": {
+          devs: [
+            {
+              conf: [
+                {
+                  baud: "9600",
+                  routing: "IOT0",
+                  wire: "2",
+                  stop: "1",
+                  own: "orp",
+                  bits: 8,
+                  type: "UART1",
+                  pair: "N",
+                  flow: "N",
+                },
+              ],
+              type: "serial",
+            },
+          ],
+        },
+        "/cloudInterface/developer_mode/close_on_inactivity": false,
+        "/imu/accel/enable": true,
+        "/imu/temp/period": 10,
+        "/imu/gyro/enable": true,
+        "/environment/lowPower": false,
+        "/environment/enable": true,
+        "/location/coordinates/enable": true,
+        "/cloudInterface/developer_mode/enable": true,
+        "/imu/accel/period": 10,
+        "/environment/ambientAirTemp": 25,
       },
     };
 
