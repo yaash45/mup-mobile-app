@@ -19,7 +19,7 @@ class SensorProfile {
   SensorProfile.fromJson(Map<String, dynamic> parsedJson)
       : temperature = SensorProfileItem(
           sensorName: 'Temperature',
-          icon: Icon(Icons.thermostat),
+          icon: Icon(Icons.thermostat_outlined),
           sensorOn: parsedJson['temperature'],
         ),
         pressure = SensorProfileItem(
@@ -34,17 +34,17 @@ class SensorProfile {
         ),
         co2Equivalent = SensorProfileItem(
           sensorName: 'CO2',
-          icon: Icon(Icons.air),
+          icon: Icon(Icons.airline_seat_flat),
           sensorOn: parsedJson['co2Equivalent'],
         ),
         breathVoc = SensorProfileItem(
           sensorName: 'Breath VOC',
-          icon: Icon(Icons.pattern_rounded),
+          icon: Icon(Icons.palette_rounded),
           sensorOn: parsedJson['breathVoc'],
         ),
         iaq = SensorProfileItem(
           sensorName: 'IAQ',
-          icon: Icon(Icons.air),
+          icon: Icon(Icons.airline_seat_flat),
           sensorOn: parsedJson['iaq'],
         );
 

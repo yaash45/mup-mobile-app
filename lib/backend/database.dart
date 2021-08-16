@@ -5,9 +5,17 @@ import 'package:mup_app/models/FrequencyProfile.dart';
 import 'package:mup_app/models/SensorProfile.dart';
 import 'package:mup_app/models/UserModel.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class OurDatabase {
   final databaseReference = FirebaseFirestore.instance;
+
+Future<String> downloadURLExample() async {
+return FirebaseStorage.instance.refFromURL('https://storage.cloud.google.com/capstonemuop.appspot/decodedimage1.jpg').toString();
+   //firebase_storage.ListResult result =
+   //   await firebase_storage.FirebaseStorage.instance.ref().listAll();
+ //return 'https://storage.cloud.google.com/muop2021/decodedimage1.jpg';
+}
 
   Future<String> createUser(UserModel user) async {
     String retVal = 'error';
@@ -41,22 +49,6 @@ class OurDatabase {
     return retVal;
   }
 
-  Stream<DeviceData> myDevice(String imei, String uid) {
-    Stream<DocumentSnapshot> octaveData =
-        databaseReference.collection('devices').doc(imei).snapshots();
-    Stream<QuerySnapshot> tempdata = databaseReference
-        .collection('datapoints')
-        .where("imei", isEqualTo: int.parse(imei))
-        .where('type', isEqualTo: 'temperature')
-        .orderBy("timestamp", descending: true)
-        .limit(1)
-        .snapshots();
-
-    return CombineLatestStream(
-            [octaveData, tempdata], (values) => values.toList())
-        .asBroadcastStream()
-        .map((snapshot) => DeviceData.fromFirebase(doc: snapshot));
-  }
 
   Stream<SensorProfile> getSensorProfile(String imei) {
     Stream<DocumentSnapshot> sensorProfile =
@@ -66,6 +58,56 @@ class OurDatabase {
         .map((snapshot) => SensorProfile.fromJson(snapshot.data()));
   }
 
+Stream<DeviceData> myDevice(String imei, String uid) {
+    Stream<DocumentSnapshot> octaveData = databaseReference.collection('devices').doc(imei).snapshots();
+    Stream<QuerySnapshot> locationdata = databaseReference.collection('mangoh_resources')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'location')
+    .orderBy("timestamp", descending: true)
+    .limit(1)
+    .snapshots();
+     Stream<QuerySnapshot> tempdata = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'temperature')
+    .orderBy("timestamp", descending: true)
+    .limit(24)
+    .snapshots();
+     Stream<QuerySnapshot> humidity = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'humidity')
+    .orderBy("timestamp", descending: true)
+    .limit(24)
+    .snapshots();
+    Stream<QuerySnapshot> pressure = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'pressure')
+    .orderBy("timestamp", descending: true)
+    .limit(24)
+    .snapshots();
+    Stream<QuerySnapshot> iaq = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'iaq')
+    .orderBy("timestamp", descending: true)
+    .limit(24)
+    .snapshots();
+    Stream<QuerySnapshot> breath_voc = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'breath_voc')
+    .orderBy("timestamp", descending: true)
+    .limit(24)
+    .snapshots();
+    Stream<QuerySnapshot> co2e = databaseReference.collection('datapoints')
+    .where("imei", isEqualTo: int.parse(imei))
+    .where('type', isEqualTo: 'co2e')
+    .orderBy("timestamp", descending: true)
+    .limit(24)
+    .snapshots();
+    Stream<DocumentSnapshot> imagedecoded = databaseReference.collection('alerts').doc('detectedimage').snapshots();
+    Stream<DocumentSnapshot> sensorprofile = databaseReference.collection('sensorProfile').doc(imei).snapshots();
+    
+    return CombineLatestStream([octaveData,locationdata,tempdata,humidity,
+    pressure,iaq,breath_voc,co2e,imagedecoded,sensorprofile], (values) => values.toList()).asBroadcastStream().map((snapshot) => DeviceData.fromFirebase(doc: snapshot));
+}
   Future<void> pushSensorProfileToFirestore(
       SensorProfile profile, String imei) {
     var updatedSensorProfile = Map<String, dynamic>();

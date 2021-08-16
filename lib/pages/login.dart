@@ -73,7 +73,7 @@ class _LoginState extends State<Login> {
             margin: EdgeInsets.only(top: 20),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50),
-                color: MupColors.appSwatch.shade100),
+                color: Color(0xff154d9e)),
             child: Center(
                 child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -117,26 +117,28 @@ class _LoginState extends State<Login> {
         child: Column(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(top: 60.0),
+              padding: const EdgeInsets.only(top: 60.0,),
               child: Center(
                 child: Container(
-                    width: 200,
+                    width: 400,
                     height: 150,
                     /*decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(50.0)),*/
-                    child: Image.asset(
-                      'MUP.png',
-                      fit: BoxFit.fitWidth,
-                      height: 100,
-                      width: 200,
+                      child: Image.asset(
+                      'MUP_logo_official.png',
+                     // fit: BoxFit.fitWidth,
+                      //height: 200,
+                      //width: 400,
                     )),
               ),
             ),
             Padding(
-              //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: TextFormField(
+              padding: const EdgeInsets.only(left:15.0,right: 15.0,top:20,bottom: 0),
+             // padding: EdgeInsets.symmetric(horizontal: 15),
+              child:
+               TextFormField(
+                key: Key("Email"),
                 controller: _emailField,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -151,6 +153,7 @@ class _LoginState extends State<Login> {
                   left: 15.0, right: 15.0, top: 15, bottom: 0),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextFormField(
+                key: Key("Password"),
                 controller: _passwordField,
                 obscureText: true,
                 decoration: InputDecoration(
